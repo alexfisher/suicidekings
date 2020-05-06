@@ -5,6 +5,7 @@ class Player: Identifiable, Codable {
         self.name = name
     }
 
+    private(set) var bankRoll: Double = 10.0
     private(set) var name: String?
 	  private(set) var id: UUID      = UUID()
     private(set) var cards: [Card] = []
@@ -15,12 +16,25 @@ class Player: Identifiable, Codable {
         }
     }
 
+    var totalCardValue: Double {
+        cards.reduce(0.0) { result, next in
+            result + next.value
+        }
+    }
+
     func receive(_ card: Card) {
+        guard self.bankRoll - card.value > 0.0 else {
+            return
+        }
+        self.bankRoll -= card.value
         self.cards.append(card)
     }
 
     func update() {
         self.cards.forEach {
+            if $0.state == .burned {
+                self.bankRoll += $0.value
+            }
             $0.update()
         }
     }

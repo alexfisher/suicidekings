@@ -1,5 +1,4 @@
 import Foundation
-import WebSocketKit
 
 class GameSession: Identifiable, Codable {
     enum State: String, Codable {

@@ -1,4 +1,6 @@
 import Foundation
+
+#if canImport(WebSocketKit)
 import WebSocketKit
 import NIO
 import ConsoleKit
@@ -87,3 +89,4 @@ extension ClientCommand {
         return ws
     }
 }
+#endif

@@ -1,187 +1,312 @@
 import Foundation
 import ConsoleKit
 
-struct AutoplayCommand: Command {
+struct GameLoop {
+    init(console: Console) {
+        self.console = console
+    }
+
+    private let console: Console
+
+    func inputPlayerNames(automatically: Bool) -> [Player] {
+        var outputString = ""
+        var players: [Player] = [] {
+            didSet {
+                outputString = players.reduce("") { result, next in
+                    result + "|>  - \(next.id): \"\(next.name ?? "")\"\n"
+                }
+            }
+        }
+
+        guard automatically == false else {
+            let botNames = (0..<10)
+                .map { _ in Player(name: .randomString(ofLength: 6)) }
+            /*
+            let botNames: [String] = [
+                "kevin",
+                "wade",
+                "alex"
+            ]
+            */
+            players = botNames // .map(Player.init(name:))
+
+            console.output("|> Adding players:".consoleText(.info))
+            console.output(outputString.consoleText(.info))
+            return players
+        }
+
+        var getName: Bool = true
+        repeat {
+            guard getName else { break }
+
+            defer { console.popEphemeral() }
+            console.pushEphemeral()
+
+            if players.count > 0 {
+                console.output("|> Adding players:".consoleText(.info))
+                console.output(outputString.consoleText(.info))
+            }
+
+            let player = Player(name: console.ask("Add Player:")) 
+            if !(player.name ?? "").isEmpty {
+                players.append(player)
+            }
+
+            console.output("")
+            getName = console.confirm("Add more?".consoleText())
+        } while getName
+
+        return players
+    }
+}
+
+struct PlayCommand: Command {
     struct Signature: CommandSignature {
-        @Option(name: "name", short: "r", help: "Sets the player name. Defaults to 10")
+        @Option(name: "rounds", short: "r", help: "Sets the number of round to play. Defaults to 10")
         var rounds: Int?
+
+        @Option(name: "liquidity", short: "l", help: "Sets the starting amount for the liquidity pool. Defaults to 10,000")
+        var liquidity: Double?
+
+        @Option(name: "rate", short: "i", help: "Sets the interest rate for the liquidity collateral. Defaults to 5%")
+        var rate: Double?
+
+        @Flag(name: "auto", short: "a", help: "Play automatically using (terrible) bots")
+        var autoMode: Bool
     }
 
     var help: String = "Plays an automated game of \"Suicide Kings\""
 
     func run(using context: CommandContext, signature: Signature) throws {
         let console = context.console
-        defer {
-            console.output("")
-        }
+        defer { console.output("") }
+
+        console.confirmOverride = signature.autoMode
+
 
         console.output("""
         - - - - - - - - - - - - - - - -
          ♔ Welcome to Suicide Kings ♔
         - - - - - - - - - - - - - - - -
-        + Autoplay Mode
+        + Play Mode (auto: \(signature.autoMode))
         + v0.0.1
         - - - - - - - - - - - - - - - -
+        |        ~ TEAM SKETH ~       |
+        - - - - - - - - - - - - - - - -
 
-        """.consoleText(color: .brightYellow))
+        """
+        .consoleText(color: .brightYellow))
 
-        var gameServer = GameServer.shared
-        gameServer.add(Player(name: "kevin"))
-        gameServer.add(Player(name: "wade"))
-        gameServer.add(Player(name: "alex"))
+        let gameLoop    = GameLoop(console: console)
+        var gameServer  = GameServer.shared
+        var gameSession: GameSession!
 
-        /// High-Level game loop
-        /// 0. Create new session
-        let gameSession = GameSession(startingAmount: 1_000, valueAwardedEachRound: 100.0)
+        let players         = gameLoop.inputPlayerNames(automatically: signature.autoMode)
+        let liquidityAmount = signature.liquidity ?? 10_000
+        let xpAwardAmount   = 100.0
+        let numberOfRounds  = signature.rounds ?? 10
+        let interestRate    = signature.rate ?? 5.0
+        let frequency       = 3.0
+        let unitOfTime      = 1
+
+        console.output("""
+        | - - - - - - - - - - - - - - - - - - - |
+        |> Game Session
+        |>  - Rounds    : \(numberOfRounds)
+        |>  - XP Award  : \(100.0)
+        | - - - - - - - - - - - - - - - - - - - |
+        |>  - Liquidity : \(liquidityAmount)
+        |>  - Int. Rate : \(interestRate)%
+        | - - - - - - - - - - - - - - - - - - - |
+        | Players       : \(players.count)
+        | - - - - - - - - - - - - - - - - - - - |
+        """.consoleText(.info))
+
+        if console.confirm("Begin Game?") == false {
+            exit(0)
+        }
+
+        // console.clear(.screen)
+
+        players.forEach { gameServer.add($0) }
+        gameSession = GameSession(startingAmount: liquidityAmount, valueAwardedEachRound: xpAwardAmount)
+
         gameSession.start(on: &gameServer)
+        gameSession.join(players: gameServer.players)
 
         repeat {
-            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-            /// Start the voting round
-            /// 1. Add all players to the current game session
-            print("| Waiting for more players to join...")
-            gameSession.join(players: gameServer.players)
+            let sessions = gameSession.playerSessions
+            let players  = sessions.compactMap { $0.player }
 
-            print("| All player have joined. Preparing voting round...")
-            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-
-            /// Deal cards to players
-            print("| Dealing 1 card to all ...")
-            gameSession.dealCards()
-
-            gameSession
-                .playerSessions
-                .compactMap { $0.player }
-                .forEach { player in
-                    print("\(player.name!) received:")
-                    print(player.cards.last!)
-            }
-
-            print("| Cards dealt. Calculating latest interest accrual...")
-
-            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-            let interestRate = 5.0
-            let frequency    = 3.0
-            let unitOfTime   = 1
-            print("""
-            | .: COMPUTING INTEREST CALCULATION :.
-            | Current Value Amount :  \(gameSession.principleAmount) ETH
-            | Interest Rate        :  \(interestRate)%
-            | Accrual Frequency    :  \(frequency)
-            | Within Unit of Time  :  \(unitOfTime) (assuming 24hrs)
-            """)
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            console.output("""
+            |> Current Value Amount :  \(gameSession.principleAmount) ETH
+            |> Accrual Frequency    :  \(frequency)
+            |> Within Unit of Time  :  \(unitOfTime) (assuming 24hrs)
+            """.consoleText(.info))
 
             let accruedInterest = gameSession.accrueInterest(atRate: interestRate, occuring: frequency)
-            print("| Interest Accrued: \(accruedInterest)")
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            console.output("|> Interest Accrued : \(accruedInterest)".consoleText(.info))
+            console.output("|> New Principle    : \(gameSession.principleAmount)".consoleText(.info))
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            console.output("|> Dealing 1 card")
 
-            print("| Interest compounded. Opening round for voting...")
+            players.forEach { player in
+                let card = Card()
+                player.receive(card)
+            }
 
-            /// 3. Create voting round
-            /// 3a. Create ballots for each player
-            /// 3b. Open the round for voting
+            /*
+            players.forEach { player in
+                console.output("|> +++ \(player.name!)\t\(card.asPipAndLevel)".consoleText(color: .cyan))
+            }
+            */
+
             guard var votingRound = gameSession.beginVoting() else {
                 break
             }
 
-            print("----------------------------------------")
-            print("| Voting Round: #\(votingRound.id) has started...")
-            print("----------------------------------------")
+            console.output("|> Voting Round: #\(votingRound.id) has begun 🎉".consoleText())
+            console.output("|> RED \(Card.Pip.hearts.display(color: .red)) || BLK \(Card.Pip.hearts.display(color: .black))")
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
             /// 4. Cast votes
             votingRound.ballots.forEach {
+								let choiceString = """
+                |-------------------------------------------------|
+                |                  MAKE A CHOICE                  |
+                |-------------------------------------------------|
+                |   Earn Interest     |   Increate Voting Power   |
+                | -----------------   | ------------------------- |
+                | A0) All Reds        | B0) All Reds              |
+                | A1) All Blacks      | B1) All Blacks            |
+                | A2) All Hearts      | B2) All Hearts            |
+                | A3) All Spades      | B3) All Spades            |
+                | A4) All Clubs       | B4) All Clubs             |
+                | A5) All Diamonds    | B5) All Diamonds          |
+                |                     |                           |
+                | A6) Specific Level  |                           |
+                |-------------------------------------------------|
+                """
+
                 var ballot = $0
                 guard let player = ballot.playerSession.player else {
-                    print("> WARNING: \(#line)")
+                    console.output("> WARNING: \(#line)".consoleText(.warning))
                     return
                 }
 
-                print( """
-                | Casting Votes for : \(player.id)
-                | Name              : \"\(player.name ?? "")\"
-                | Available Votes   : \(player.votes)
-                """)
-
-                /*
-                if votingRound.id >= 2 && player.name == "kevin" {
-                    var card: Card!
-                    card.burn()
-                    print(card!)
-                    print("| \(player.name!) has burned a card for \(card.votes) votes! (\(card.id)")
-                }
-                */
-
-								let choiceString = """
-								|-------------------------------------------------|
-								|                  MAKE A CHOICE                  |
-								|-------------------------------------------------|
-								|   Earn Interest     |   Increate Voting Power   |
-								| -----------------   | ------------------------- |
-								| A0) All Reds	      | B0) All Reds              |
-								| A1) All Blacks      | B1) All Blacks            |
-								| A2) All Hearts      | B2) All Hearts            |
-								| A3) All Spades      | B3) All Spades            |
-								| A4) All Clubs       | B4) All Clubs             |
-								| A5) All Diamonds    | B5) All Diamonds          |
-								|                     |                           |
-								| A6) Specific Level  |                           |
-								|-------------------------------------------------|
-								"""
 								console.output(choiceString.consoleText(.info))
+                console.output("> ============================================ <")
+                console.output("\(player.name!) -- bank roll: \(player.bankRoll)".consoleText())
+                console.output("\(player.name!) -- card val.: \(player.totalCardValue)".consoleText())
+                console.output("> ============================================ <")
 
-                print("> Casting votes ============================== <")
+
+                let groupedCards = Dictionary(grouping: player.cards, by: { $0.level })
+                groupedCards.forEach { (pip: Int, cards: [Card]) in
+                    let output = cards.map({ $0.asPipAndXP }).joined(separator: ", ")
+                    console.output("Level \(pip): \(output)\n".consoleText())
+                }
+                console.output("> ============================================ <")
+
+                if false {
+
                 do {
                     while ballot.availableVotes > 0 {
-										console.output("VOTES REMAINING: \(ballot.availableVotes)".consoleText(.info))
-										let votes = Int(console.ask("How many votes?"))!
-										var choice: VotingRound.Choice!
-												switch console.ask("Which choice?").uppercased() {
-														case "A0": choice = VotingRound.Choice(proposal: .earnInterest(on: .color(.red)), votes: votes)
-														case "A1": choice = VotingRound.Choice(proposal: .earnInterest(on: .color(.black)), votes: votes)
-														case "A2": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.hearts)), votes: votes)
-														case "A3": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.spades)), votes: votes)
-														case "A4": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.clubs)), votes: votes)
-														case "A5": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.diamonds)), votes: votes)
-														case "A6": 
-																	let level = Int(console.ask("Level:"))!
-																	choice = VotingRound.Choice(proposal: .earnInterest(on: .level(level)), votes: votes)
-														case "B0": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .color(.red)), votes: votes)
-														case "B1": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .color(.black)), votes: votes)
-														case "B2": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.hearts)), votes: votes)
-														case "B3": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.spades)), votes: votes)
-														case "B4": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.clubs)), votes: votes)
-														case "B5": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.diamonds)), votes: votes)
-														default: ()
-												}
-												try ballot.mark(choice: choice)
-                        print("| Random choice     : \(choice.votes) vote(s) -> \(choice.proposal)")
-                        print("|  - Votes Remaining:", ballot.availableVotes)
+                        switch console.choose("\(player.name!)'s turn:", from: ["View Hand", "Burn Card", "Buy a Card", "Vote"]) {
+                            case "View Hand":
+                                console.pushEphemeral()
+                                let groupedCards = Dictionary(grouping: player.cards, by: { $0.level })
+                                groupedCards.flatMap({ $0.1 }).enumerated().forEach {
+                                    console.output("#\($0.0): \($0.1.asPip) [votes: \($0.1.votes); xp: \($0.1.points)]".consoleText())
+                                }
+                                console.output("> ============================================ <")
+                                _ = console.ask("Press 'any' key to continue")
+                                console.popEphemeral()
+                            case "Burn Card":
+                                player.cards.enumerated().forEach {
+                                    console.output("#\($0.0): \($0.1.asPip) +\($0.1.votes)".consoleText())
+                                }
+
+                                let response = console.ask("Which card?")
+                                guard let idx = Int(response) else {
+                                    continue
+                                }
+                                let card = player.cards[idx]
+                                guard card.level > 0 else {
+                                    console.output("|> Cannot burn a 'Level 0' card!")
+                                    console.output("> ============================================ <")
+                                    _ = console.ask("Press 'any' key to continue")
+                                    continue
+                                }
+                                card.burn()
+                                console.output("|> \(player.name!) has burned a card for \(card.votes) votes! (\(card.id))".consoleText(color: .white))
+                            case "Buy a Card":
+                                let card = Card()
+                                ballot.playerSession.player?.receive(card)
+                                console.output("\(card.asPip)")
+                                console.output("|> +++ \(player.name!)\t\(card.asPipAndLevel)".consoleText(color: .cyan))
+                            default:
+                                console.output("VOTES REMAINING: \(ballot.availableVotes)".consoleText(.info))
+                                guard let votes = Int(console.ask("How many votes?")) else {
+                                    continue
+                                }
+
+                                var choice: VotingRound.Choice!
+                                switch console.ask("Which choice?", isSecure: true).uppercased() {
+                                    case "A0": choice = VotingRound.Choice(proposal: .earnInterest(on: .color(.red)), votes: votes)
+                                    case "A1": choice = VotingRound.Choice(proposal: .earnInterest(on: .color(.black)), votes: votes)
+                                    case "A2": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.hearts)), votes: votes)
+                                    case "A3": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.spades)), votes: votes)
+                                    case "A4": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.clubs)), votes: votes)
+                                    case "A5": choice = VotingRound.Choice(proposal: .earnInterest(on: .pip(.diamonds)), votes: votes)
+                                    case "A6": 
+                                          let level = Int(console.ask("Level:"))!
+                                          choice = VotingRound.Choice(proposal: .earnInterest(on: .level(level)), votes: votes)
+                                    case "B0": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .color(.red)), votes: votes)
+                                    case "B1": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .color(.black)), votes: votes)
+                                    case "B2": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.hearts)), votes: votes)
+                                    case "B3": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.spades)), votes: votes)
+                                    case "B4": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.clubs)), votes: votes)
+                                    case "B5": choice = VotingRound.Choice(proposal: .increaseVotingPower(for: .pip(.diamonds)), votes: votes)
+                                    default: ()
+                                }
+                                try ballot.mark(choice: choice)
+                                // console.output("| Random choice     : \(choice.votes) vote(s) -> \(choice.proposal)".consoleText())
+                                // console.output("|  - Votes Remaining: \(ballot.availableVotes)".consoleText())
+                        }
                     }
+
                 }
                 catch {
                     print(error)
                 }
-                print("> ============================================ <")
 
+                }
 
-
-								if false {
-										print("> Casting votes ============================== <")
+                //  BOT VOTING IS BROKEN
+								if true {
+										console.output("> Casting votes ============================== <")
 										do {
 												while ballot.availableVotes > 0 {
 														let choice = try markRandomChoice(on: &ballot, withVotes: .random(in: 1...ballot.availableVotes))
-														print("| Random choice     : \(choice.votes) vote(s) -> \(choice.proposal)")
-														print("|  - Votes Remaining:", ballot.availableVotes)
+														console.output("| Random choice     : \(choice.votes) vote(s) -> \(choice.proposal)".consoleText())
+														console.output("|  - Votes Remaining: \(ballot.availableVotes)".consoleText())
 												}
 										}
 										catch {
 												print(error)
 										}
-										print("> ============================================ <")
+										console.output("> ============================================ <")
 								}
             }
 
-            print("Closing Round #\(votingRound.id)")
+            // console.clear(.screen)
+            console.output("> ============================================ <")
+            console.output("\tClosing Round #\(votingRound.id)".consoleText())
             gameSession.end(votingRound: &votingRound)
+            console.output("> ============================================ <")
 
             let allEligibleCards = votingRound.ballots
                 .compactMap { $0.playerSession.player?.cards }
@@ -192,20 +317,52 @@ struct AutoplayCommand: Command {
                 .flatMap { $0.choices }
 
             let group = Dictionary<String, [VotingRound.Choice]>(grouping: allBallotChoices, by: { $0.proposal.label })
-            print(group as AnyObject)
+            console.output("\(group as AnyObject)".consoleText(.info))
+
+            let totalVotesForEarnInterestVotes = group["earnInterest"]?.reduce(0) { result, next in
+                result + Double(next.votes)
+            } ?? 0
+
+            let earnedInterestVoteChoicesAndVotes = group["earnInterest"]?.map {
+                ($0.proposal.characteristic, Double($0.votes) / totalVotesForEarnInterestVotes)
+            } ?? []
+
+            console.output("| Distributing earned interest to these eligble cards...")
+            earnedInterestVoteChoicesAndVotes.forEach { (characteristic, percent) in
+                let valueAwardedThisRound = accruedInterest
+                console.output("| \(percent * 100.0)% to: \(characteristic)".consoleText())
+
+                allEligibleCards.forEach { card in
+                    switch characteristic {
+                    case .level(let level): 
+                        if level == card.level {
+                            card.value += percent * valueAwardedThisRound
+                        }
+                    case .color(let color):
+                        if color == card.color {
+                            card.value += percent * valueAwardedThisRound
+                        }
+                    case .pip(let pip):
+                        if pip == card.pip {
+                            card.value += percent * valueAwardedThisRound
+                        }
+                    case .unknown: ()
+                    }
+                }
+            }
 
             let totalVotesForIncreasePowerVotes = group["increaseVotingPower"]?.reduce(0) { result, next in
                 result + Double(next.votes)
             } ?? 0
 
-            let choicesAndVotes = group["increaseVotingPower"]?.map {
+            let increaseVoteChoicesAndVotes = group["increaseVotingPower"]?.map {
                 ($0.proposal.characteristic, Double($0.votes) / totalVotesForIncreasePowerVotes)
             } ?? []
 
-            print("| Increasing exp. points to these eligble cards...")
-            choicesAndVotes.forEach { (characteristic, percent) in
+            console.output("| Increasing exp. points to these eligble cards...")
+            increaseVoteChoicesAndVotes.forEach { (characteristic, percent) in
                 let valueAwardedThisRound = gameSession.valueAwardedEachRound
-                print("| \(percent * 100)% to: \(characteristic)")
+                console.output("| \(percent * 100)% to: \(characteristic)".consoleText())
 
                 allEligibleCards.forEach { card in
                     switch characteristic {
@@ -226,27 +383,33 @@ struct AutoplayCommand: Command {
                 }
             }
 
-            print("----------------------------------------")
-            print("| Resulting cards:")
+            console.output("| ----------------------------------------")
+            console.output("|> Resulting cards:")
             votingRound.ballots
                 .compactMap { $0.playerSession.player }
                 .forEach {
-                    print("| \($0.name!)")
+                    console.output("| \($0.name!)")
                     $0.cards
                         .filter { $0.state == .playable }
                         .sorted(by: <)
                         .forEach {
-                            print(" -", $0.pip.display(color: $0.color), "@ LVL \($0.level) (xp: \($0.points))")
+                            console.output("""
+                            - \($0.asPip) [lvl: \($0.level); xp: \($0.points); val.: \($0.value)]
+                            """.consoleText())
                         }
                 }
 
-        } while gameSession.completedRounds < 15
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            _ = console.confirm("Press 'any' to continue")
+            // console.clear(.screen)
+            usleep(150000)
+        } while gameSession.completedRounds < numberOfRounds
 
         gameSession.stop(on: &gameServer)
     }
 }
 
-extension AutoplayCommand {
+extension PlayCommand {
     @discardableResult
     fileprivate func markRandomChoice(
               on ballot: inout VotingRound.Ballot,

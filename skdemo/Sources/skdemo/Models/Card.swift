@@ -17,21 +17,21 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
 
         func display(color: Color) -> String {
             switch (self, color) {
-            case (.hearts, .red):
-                return "♡"
-            case (.spades, .red):
-                return "♤"
-            case (.clubs, .red):
-                return "♤"
-            case (.diamonds, .red):
-                return "♢"
             case (.hearts, .black):
-                return "♥"
+                return "♡"
             case (.spades, .black):
-                return "♠"
+                return "♤"
             case (.clubs, .black):
-                return "♣"
+                return "♤"
             case (.diamonds, .black):
+                return "♢"
+            case (.hearts, .red):
+                return "♥"
+            case (.spades, .red):
+                return "♠"
+            case (.clubs, .red):
+                return "♣"
+            case (.diamonds, .red):
                 return "♦"
             }
         }
@@ -62,6 +62,7 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
 
     var state: State   = .playable
     var points: Double = 0.0
+    var value: Double  = 0.1
 		private(set) var id: UUID	    = UUID()
     private(set) var pip: Pip     = .random()
     private(set) var color: Color = .random()
@@ -81,12 +82,24 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
         }
     }
 
+    var asPip: String {
+        pip.display(color: color)
+    }
+
+    var asPipAndXP: String {
+        "\(asPip)" + String(format: " (xp: %.2f)", points)
+    }
+
+    var asPipAndLevel: String {
+        "LVL \(level) \(asPip)"
+    }
+
     var description: String {
         """
-        - \(pip.display(color: color))
-        - Exp. : \(points)
-        - Level: \(level)
-        - Votes: \(votes)
+        \(asPipAndLevel)
+        XP: \(points)
+        VT: \(votes)
+        $$: \(value)
         """
     }
 
