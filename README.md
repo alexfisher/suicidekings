@@ -19,17 +19,25 @@ To get the project running:
 
 1. Download git repo locally and optionally _Open folder_ in Visual Studio
 
-2. Terminal #1 - Run ganache-cli in deterministic mode on port 8545
+2. Terminal #1 - Install project dependencies
+
+`npm install`
+
+3. Terminal #1 - Run ganache-cli in deterministic mode on port 8545
 
 `ganache-cli -d`
 
-3. Terminal #2 - Start truffle and connect to ganache blockchain
+4. Terminal #2 - Start truffle,  compile/migrate the project to the blockchain
 
 `truffle console --network develop`
 
-4. Terminal #3 - Run the react front-end at http://localhost:3000
+_truffle(develop)>_`migrate --reset`
+
+5. Terminal #3 - Install dependencies and run the react front-end at http://localhost:3000
 
 `cd app`
+
+`npm install`
 
 `npm run start`
 
