@@ -1,4 +1,5 @@
-# suicidekings
+# Suicide Kings
+![Suicide Kings Logo](/app/src/logo.png)
 
 ## Quickstart Instructions ##
 Prerequisites/Versions I've used:
