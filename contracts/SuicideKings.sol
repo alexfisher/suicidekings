@@ -25,6 +25,8 @@ contract SuicideKings is ERC721Full {
 
     return newItemId;
   }
+
+  // TODO: Let's add a function to enumerate a list of all our NFTs, e.g.
   /*
   function myKings() public view returns (uint256[]) {
     return _tokensOfOwner(msg.sender);
