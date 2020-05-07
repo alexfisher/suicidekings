@@ -9,7 +9,7 @@ Prerequisites/Versions I've used:
 
 To get the project running:
 
-1. Optional - Open folder in Visual Studio
+1. Download git repo locally and optionally _Open folder_ in Visual Studio
 
 2. Terminal #1 - Run ganache-cli in deterministic mode on port 8545
 
