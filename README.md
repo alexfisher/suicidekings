@@ -26,6 +26,8 @@ To get the project running:
 `npm run start`
 
 ## More Information ##
-Initially, the dapp just looks for a web3 instance running at localhost:8545, but we'll be updating it soon to use Metamask, Web3Modal, or something else.
+* Initially, the dapp just looks for a web3 instance running at localhost:8545, but we'll be updating it soon to use Metamask, Web3Modal, or something else.
 
-Notes on how I built the initial project skeleton with React, Drizzle, Truffle, and Open Zeppelin's libraries [can be found in our team folder](https://docs.google.com/document/d/1I7B9iST4kpjjlLcyr6ArD9XWojdH8XJXWWMRTyZ4SWQ/edit) on Google Drive.
+* The project currently uses Open Zeppelin 2.5.1 even though the latest version is 3.x (you can confirm via `npm list`).
+
+* Notes on how I built the initial project skeleton with React, Drizzle, Truffle, and Open Zeppelin's libraries [can be found in our team folder](https://docs.google.com/document/d/1I7B9iST4kpjjlLcyr6ArD9XWojdH8XJXWWMRTyZ4SWQ/edit) on Google Drive.
