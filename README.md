@@ -4,8 +4,11 @@
 ## Quickstart Instructions ##
 Prerequisites/Versions I've used:
 
-1. truffle v5.1.24 on Ubuntu 18.04 (`npm install -g truffle`)
-2. ganache-cli (`npm install -g ganache-cli`)
+* Ubuntu 18.04
+* Node v10.20.1
+* npm 6.14.5  
+* truffle v5.1.24 (`npm install -g truffle`)
+* ganache-cli v6.9.1 (`npm install -g ganache-cli`)
 
 To get the project running:
 
