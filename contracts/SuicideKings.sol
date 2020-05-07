@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/drafts/Counters.sol";
 
-contract SuicideKings is ERC721Full, ERC721Enumerable {
+contract SuicideKings is ERC721Full {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
   event MintKing(uint256 id);
@@ -25,10 +25,11 @@ contract SuicideKings is ERC721Full, ERC721Enumerable {
 
     return newItemId;
   }
-
+  /*
   function myKings() public view returns (uint256[]) {
     return _tokensOfOwner(msg.sender);
   }
+  */
 
   function setValue(uint256 value) public {
     _value = value;
