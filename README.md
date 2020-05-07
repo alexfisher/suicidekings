@@ -5,6 +5,7 @@
 Prerequisites/Versions I've used:
 
 * Ubuntu 18.04
+* VSCode 1.44.2 (w/ extensions: solidity 0.0.72, Solidity Contract Flattener 0.0.7, Solidity Visual Auditor 0.0.24)
 * Node v10.20.1
 * npm 6.14.5  
 * truffle v5.1.24 (`npm install -g truffle`)
