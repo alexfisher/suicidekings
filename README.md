@@ -1,6 +1,10 @@
 # Suicide Kings
 ![Suicide Kings Logo](/app/src/logo.png)
 
+HackMoney 2020 Hackathon Project
+
+Group Members: Alex Fisher, Wade Kimbrough, Kevin Vitale
+
 ## Quickstart Instructions ##
 Prerequisites/Versions I've used:
 
