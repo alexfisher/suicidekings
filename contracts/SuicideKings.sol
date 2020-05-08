@@ -1,7 +1,6 @@
 pragma solidity >=0.4.21 <0.7.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/drafts/Counters.sol";
 
 contract SuicideKings is ERC721Full {
@@ -25,13 +24,10 @@ contract SuicideKings is ERC721Full {
 
     return newItemId;
   }
-
-  // TODO: Let's add a function to enumerate a list of all our NFTs, e.g.
-  /*
-  function myKings() public view returns (uint256[]) {
+  
+  function myKings() public view returns (uint256[] memory) {
     return _tokensOfOwner(msg.sender);
   }
-  */
 
   function setValue(uint256 value) public {
     _value = value;
