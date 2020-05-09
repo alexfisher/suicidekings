@@ -34,11 +34,13 @@ extension VotingRound {
             (playerSession.player?.votes ?? 0) - castedVotes
         }
 
-        func mark(choice: Choice) throws {
+        @discardableResult
+        func mark(choice: Choice) throws -> Choice {
             guard availableVotes - choice.votes >= 0 else {
                 throw Error.insufficentVotes
             }
             self.choices.append(choice)
+            return choice
         }
 
         func finalize() -> Result {
@@ -46,6 +48,10 @@ extension VotingRound {
             /// Each player needs to update burned cards
             self.playerSession.player?.update()
             return Result()
+        }
+        
+        var highestCardLevel: Int {
+            playerSession.player?.cards.sorted(by: >).first?.level ?? 0
         }
     }
 }

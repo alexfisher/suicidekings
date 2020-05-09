@@ -1,13 +1,15 @@
 import Foundation
 
 class Player: Identifiable, Codable {
-    init(name: String?) {
+    init(name: String?, isBot: Bool = false) {
         self.name = name
+        self.isBot = isBot
     }
 
+    private(set) var isBot: Bool = false
     private(set) var bankRoll: Double = 10.0
     private(set) var name: String?
-	  private(set) var id: UUID      = UUID()
+    private(set) var id: UUID      = UUID()
     private(set) var cards: [Card] = []
 
     var votes: Int {

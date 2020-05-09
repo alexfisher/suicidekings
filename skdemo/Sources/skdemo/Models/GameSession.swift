@@ -1,4 +1,5 @@
 import Foundation
+import ConsoleKit
 
 class GameSession: Identifiable, Codable {
     enum State: String, Codable {
@@ -9,15 +10,24 @@ class GameSession: Identifiable, Codable {
         case stopped
     }
 
-    init(startingAmount principleAmount: Double, valueAwardedEachRound: Double) {
-        self.principleAmount = principleAmount
-        self.valueAwardedEachRound = valueAwardedEachRound
+    convenience init(startingAmount principleAmount: Double,
+                              valueAwardedEachRound: Double)
+    {
+        self.init(settings: GameSessionSettings(liquidity: principleAmount, 
+                                            xpAwardAmount: valueAwardedEachRound))
     }
 
+    init(settings: GameSessionSettings) {
+        self.settings = settings
+        self.principleAmount = settings.liquidity
+    }
+
+    private(set) var settings: GameSessionSettings
     private(set) var state: State = .initialized
-    private(set) var principleAmount: Double
-    private(set) var valueAwardedEachRound: Double
     private(set) var completedRounds: Int = 0
+
+    private(set) var principleAmount: Double
+    var valueAwardedEachRound: Double { settings.xpAwardAmount }
 
     private(set) var id: UUID = UUID()
     private(set) var playerSessions: [PlayerSession] = []
@@ -87,9 +97,11 @@ class GameSession: Identifiable, Codable {
     }
 
     func beginVoting() -> VotingRound? {
-        guard case(.waitingForPlayers) = self.state else {
+        guard case(.waitingForPlayers) = self.state, self.completedRounds < self.settings.numberOfRound else
+        {
             return nil
         }
+
         defer {
             self.state = .voting
         }
@@ -105,9 +117,7 @@ class GameSession: Identifiable, Codable {
     }
 
     func stop(on gameServer: inout GameServer) {
-        defer {
-            self.state = .stopped
-        }
+        self.state = .stopped
     }
 
     func hasPlayerJoined(_ player: Player) -> Bool {
@@ -115,4 +125,28 @@ class GameSession: Identifiable, Codable {
             .map { $0.playerID }
             .contains(player.id)
     }
+}
+
+struct GameSessionSettings: Codable {
+    init(           liquidity: Double = 10_000, 
+                xpAwardAmount: Double = 100_0, 
+                numberOfRound: Int    = 10_0,
+                 interestRate: Double = 0_05,
+            compoundFrequency: Double = 3_0,
+     interestRateSeriesLegnth: Int    = 1_0)
+    {
+        self.liquidity                 = liquidity
+        self.xpAwardAmount             = xpAwardAmount
+        self.numberOfRound             = numberOfRound
+        self.interestRate              = interestRate
+        self.compoundFrequency         = compoundFrequency
+        self.interestRateSeriesLegnth  = interestRateSeriesLegnth
+    }
+
+    let          liquidity: Double
+    let      xpAwardAmount: Double
+    let      numberOfRound: Int
+    let       interestRate: Double
+    let  compoundFrequency: Double
+    let interestRateSeriesLegnth: Int
 }

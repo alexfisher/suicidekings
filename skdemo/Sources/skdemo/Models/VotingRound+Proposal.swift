@@ -1,14 +1,12 @@
-var LevelCapForRandomGenerator = 4
-
 extension VotingRound {
     enum Proposal: CustomStringConvertible {
         case earnInterest(on: Characteristic)
         case increaseVotingPower(for: Characteristic)
 
-        static func random() -> VotingRound.Proposal {
+        static func random(levelCap: Int) -> VotingRound.Proposal {
             switch Int.random(in: 0...1) {
-            case 0: return .earnInterest(on: .random())
-            case 1: return .increaseVotingPower(for: .random())
+                case 0: return .earnInterest(on: .random(levelCap: levelCap))
+                case 1: return .increaseVotingPower(for: .random(levelCap: levelCap))
             default: fatalError()
             }
         }
@@ -70,13 +68,13 @@ extension VotingRound.Proposal: Codable {
 }
 
 extension VotingRound.Proposal {
-    enum Characteristic: CustomStringConvertible, Codable {
+    enum Characteristic: Hashable, CustomStringConvertible, Codable {
         case color(Card.Color)
         case level(Int)
         case pip(Card.Pip)
         case unknown
 
-        static func random(levelCap: Int = LevelCapForRandomGenerator) -> Characteristic {
+        static func random(levelCap: Int) -> Characteristic {
             switch Int.random(in: 0...2) {
             case 0: return .color(.random())
             case 1: return .level(Int.random(in: 0...levelCap))
