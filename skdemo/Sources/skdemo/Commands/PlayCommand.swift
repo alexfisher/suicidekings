@@ -1,65 +1,6 @@
 import Foundation
 import ConsoleKit
 
-struct GameLoop {
-    init(console: Console) {
-        self.console = console
-    }
-
-    private let console: Console
-
-    func inputPlayerNames(automatically: Bool) -> [Player] {
-        var outputString = ""
-        var players: [Player] = [] {
-            didSet {
-                outputString = players.reduce("") { result, next in
-                    result + "|>  - \(next.id): \"\(next.name ?? "")\"\n"
-                }
-            }
-        }
-
-        guard automatically == false else {
-            let botNames = (0..<10)
-                .map { _ in Player(name: .randomString(ofLength: 6)) }
-            /*
-            let botNames: [String] = [
-                "kevin",
-                "wade",
-                "alex"
-            ]
-            */
-            players = botNames // .map(Player.init(name:))
-
-            console.output("|> Adding players:".consoleText(.info))
-            console.output(outputString.consoleText(.info))
-            return players
-        }
-
-        var getName: Bool = true
-        repeat {
-            guard getName else { break }
-
-            defer { console.popEphemeral() }
-            console.pushEphemeral()
-
-            if players.count > 0 {
-                console.output("|> Adding players:".consoleText(.info))
-                console.output(outputString.consoleText(.info))
-            }
-
-            let player = Player(name: console.ask("Add Player:")) 
-            if !(player.name ?? "").isEmpty {
-                players.append(player)
-            }
-
-            console.output("")
-            getName = console.confirm("Add more?".consoleText())
-        } while getName
-
-        return players
-    }
-}
-
 struct PlayCommand: Command {
     struct Signature: CommandSignature {
         @Option(name: "rounds", short: "r", help: "Sets the number of round to play. Defaults to 10")
@@ -71,31 +12,29 @@ struct PlayCommand: Command {
         @Option(name: "rate", short: "i", help: "Sets the interest rate for the liquidity collateral. Defaults to 5%")
         var rate: Double?
 
-        @Flag(name: "auto", short: "a", help: "Play automatically using (terrible) bots")
-        var autoMode: Bool
+        @Option(name: "starting-cards", short: "c", help: "Sets the number of cards to begin each game with. Defaults to 0")
+        var cardsToStart: Int?
+
+        @Option(name: "bot-count", short: "a", help: "Play automatically using (terrible) bots")
+        var botCount: Int?
+
+        @Flag(name: "bots", short: "b", help: "Play automatically using (terrible) bots")
+        var bots: Bool
     }
 
     var help: String = "Plays an automated game of \"Suicide Kings\""
 
     func run(using context: CommandContext, signature: Signature) throws {
-        let console = context.console
-        defer { console.output("") }
+        let appContext = AppContext(
+                using: context, 
+            signature: signature
+        )
 
-        console.confirmOverride = signature.autoMode
+        appContext.console.clear(.screen)
+        AppController(with: appContext).start()
 
-
-        console.output("""
-        - - - - - - - - - - - - - - - -
-         ♔ Welcome to Suicide Kings ♔
-        - - - - - - - - - - - - - - - -
-        + Play Mode (auto: \(signature.autoMode))
-        + v0.0.1
-        - - - - - - - - - - - - - - - -
-        |        ~ TEAM SKETH ~       |
-        - - - - - - - - - - - - - - - -
-
-        """
-        .consoleText(color: .brightYellow))
+        /*
+        exit(0)
 
         let gameLoop    = GameLoop(console: console)
         var gameServer  = GameServer.shared
@@ -126,10 +65,12 @@ struct PlayCommand: Command {
             exit(0)
         }
 
-        // console.clear(.screen)
-
         players.forEach { gameServer.add($0) }
-        gameSession = GameSession(startingAmount: liquidityAmount, valueAwardedEachRound: xpAwardAmount)
+
+        gameSession = GameSession(
+                startingAmount: liquidityAmount, 
+         valueAwardedEachRound: xpAwardAmount
+        )
 
         gameSession.start(on: &gameServer)
         gameSession.join(players: gameServer.players)
@@ -319,7 +260,8 @@ struct PlayCommand: Command {
             let group = Dictionary<String, [VotingRound.Choice]>(grouping: allBallotChoices, by: { $0.proposal.label })
             console.output("\(group as AnyObject)".consoleText(.info))
 
-            let totalVotesForEarnInterestVotes = group["earnInterest"]?.reduce(0) { result, next in
+            let totalVotesForEarnInterestVotes = group["earnInterest"]?
+         .reduce(0) { result, next in
                 result + Double(next.votes)
             } ?? 0
 
@@ -402,10 +344,11 @@ struct PlayCommand: Command {
             console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
             _ = console.confirm("Press 'any' to continue")
             // console.clear(.screen)
-            usleep(150000)
+            // usleep(150000)
         } while gameSession.completedRounds < numberOfRounds
 
         gameSession.stop(on: &gameServer)
+         */
     }
 }
 
@@ -415,7 +358,7 @@ extension PlayCommand {
               on ballot: inout VotingRound.Ballot,
         withVotes votes: Int? = nil) throws -> VotingRound.Choice
     {
-        let choice: VotingRound.Choice = .random(withVotes: votes ?? ballot.availableVotes)
+        let choice: VotingRound.Choice = .random(withVotes: votes ?? ballot.availableVotes, levelCap: ballot.highestCardLevel)
         try ballot.mark(choice: choice)
         return choice
     }

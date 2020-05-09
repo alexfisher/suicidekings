@@ -55,6 +55,11 @@ final class GameServer: Codable {
         }
     }
 
+    func reset() {
+        self.players.removeAll()
+        self.gameSessions.removeAll()
+    }
+
     static var shared = GameServer()
 }
 

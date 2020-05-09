@@ -1,6 +1,6 @@
 import Foundation
 
-final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
+final class Card: Hashable, Identifiable, Comparable, Codable, CustomStringConvertible {
     static func < (lhs: Card, rhs: Card) -> Bool {
         lhs.points < rhs.points
     }
@@ -8,12 +8,85 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
     static func == (lhs: Card, rhs: Card) -> Bool {
         lhs.points == rhs.points
     }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id.hashValue)
+    }
 
-    enum Pip: String, Codable {
+    enum Pip: String, Hashable, Codable {
         case hearts
         case clubs
         case spades
         case diamonds
+        
+        var asPip: String {
+            switch self {
+                case .hearts:   return "♥"
+                case .clubs:    return "♣"
+                case .spades:   return "♠"
+                case .diamonds: return "♦"
+            }
+        }
+        
+        var asciiArt: (pip: String, art: String) {
+            let pip: String = {
+                switch self {
+                case .hearts:   return "♥"
+                case .clubs:    return "♣"
+                case .spades:   return "♠"
+                case .diamonds: return "♦"
+                }
+            }()
+            
+            return (pip: "|> \(pip) - \(self.rawValue.uppercased())", art: """
+            ┌─────────┐
+            │K        │
+            │         │
+            │         │
+            │    \(pip)    │
+            │         │
+            │         │
+            │       K │
+            └─────────┘
+            """)
+        }
+        
+        var asciiPip: String {
+            switch self {
+            case .diamonds: return
+                """
+                  /▲\\
+                 /♦♦♦\\
+                 ♦♦♦♦♦
+                 \\♦♦♦/
+                  \\▼/
+                """
+            case .clubs: return
+                """
+                     ♣
+                   (♣♣♣)
+                 (♣ )♣( ♣)
+                ((♣)) ((♣))
+                    )♣(
+                """
+            case .hearts: return
+                """
+                 ⏜    ⏜
+                (♥♥\\ /♥♥)
+                 \\♥♥♥♥♥/
+                  \\♥♥♥/
+                   \\♥/
+                """
+            case .spades: return
+                """
+                   /♠\\
+                  /♠♠♠\\
+                 /♠♠♠♠♠\\
+                (♠♠♠♠♠♠♠)
+                   )♠(
+                """
+            }
+        }
 
         func display(color: Color) -> String {
             switch (self, color) {
@@ -33,6 +106,7 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
                 return "♣"
             case (.diamonds, .red):
                 return "♦"
+            default: return ""
             }
         }
 
@@ -42,15 +116,23 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
             allPips.randomElement()!
         }
     }
+    
 
-    enum Color: String, Codable {
+    enum Color: String, Hashable, Codable {
         case red
         case black
+        case blue
+        case yellow
+        case white
+        case green
+        case magenta
 
         static private let allColors: [Color] = [.red, .black]
+        static private let brightColors: [Color] = [.red, .magenta, .white, .green]
 
         static func random() -> Color {
-            allColors.randomElement()!
+            // allColors.randomElement()!
+            brightColors.randomElement()!
         }
     }
 
@@ -115,3 +197,27 @@ final class Card: Identifiable, Comparable, Codable, CustomStringConvertible {
     }
 }
 
+#if canImport(ConsoleKit)
+import ConsoleKit
+extension Card {
+    var consoleText: ConsoleText {
+        self.pip.asciiArt.pip.consoleText(color: color.consoleColor) + " (" +
+        self.color.rawValue.uppercased().consoleText(color: color.consoleColor) + ")\n" +
+        self.pip.asciiArt.art.consoleText(color: color.consoleColor)
+    }
+}
+
+extension Card.Color {
+    var consoleColor: ConsoleColor {
+        switch self {
+        case .black: return .brightBlack
+        case .red: return .brightRed
+        case .white: return .brightWhite
+        case .yellow: return .brightYellow
+        case .magenta: return .brightMagenta
+        case .blue: return .brightBlue
+        case .green: return .brightGreen
+        }
+    }
+}
+#endif

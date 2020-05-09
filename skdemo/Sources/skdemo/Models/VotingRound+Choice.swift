@@ -8,8 +8,8 @@ extension VotingRound {
         private(set) var proposal: Proposal
         private(set) var votes: Int
 
-        static func random(withVotes votes: Int) -> Choice {
-            .init(proposal: .random(), votes: votes)
+        static func random(withVotes votes: Int, levelCap: Int) -> Choice {
+            .init(proposal: .random(levelCap: levelCap), votes: votes)
         }
     }
 }
