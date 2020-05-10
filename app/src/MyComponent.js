@@ -47,7 +47,7 @@ export default ({ drizzle, drizzleState }) => {
             methodArgs={[drizzleState.accounts[0]]}
           />
         </p>
-        {/* TODO: Below triggers warnings in console, but if player has NFTs it does return the list of NFTs!
+        {/* TODO: Below triggers warnings in console, but if player has NFTs it does return the list of NFTs! */}
         <p>
           <ContractData
             drizzle={drizzle}
@@ -56,7 +56,7 @@ export default ({ drizzle, drizzleState }) => {
             method="myKings"
           />
         </p>
-        */}
+        
       </div>
 
       <div className="section">
