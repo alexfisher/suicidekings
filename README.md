@@ -41,6 +41,21 @@ _truffle(develop)>_`migrate --reset`
 
 `npm run start`
 
+## Running on Ropsten/Infura ##
+Create a `secrets.json` file in the project root (same level as truffle-config.js).  It should contain a mnemonic (you can generate via ganache/ganache-cli) and infura API Key (sign-up for free at infura.io)
+
+```
+{
+  "mnemonic": "iron skate call erode fly crunch spirit minute cloth advice horse smooth",
+  "infuraApiKey": "3b0206f022a6462cacf91dc79e2b9833"
+}
+```
+Then, be sure to start truffle using:
+
+`truffle console --network ropsten`
+
+And, in your browser be sure to switch Metamask to Ropsten and seed it with the correct mnemonic (Logout and Restore).
+
 ## More Information ##
 * Initially, the dapp just looks for a web3 instance running at localhost:8545, but we'll be updating it soon to use Metamask, Web3Modal, or something else.
 
