@@ -24,7 +24,7 @@ contract SuicideKings is ERC721Full {
 
     return newItemId;
   }
-  
+
   function myKings() public view returns (uint256[] memory) {
     return _tokensOfOwner(msg.sender);
   }
