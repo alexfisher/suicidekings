@@ -25,5 +25,14 @@ struct VotingRound: Identifiable, Codable {
             _ = $0.finalize()
         }
     }
+    
+    var playableCards: [Card] {
+        ballots.flatMap {
+            $0.playerCards.filter { $0.state == .playable}
+        }
+    }
+    
+    var burnedValue: Double {
+        ballots.map({ $0.burnedCardsValue }).reduce(0.0) { result, next in result + next }
+    }
 }
-

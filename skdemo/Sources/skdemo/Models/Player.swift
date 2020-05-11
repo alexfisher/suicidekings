@@ -1,13 +1,14 @@
 import Foundation
 
 class Player: Identifiable, Codable {
-    init(name: String?, isBot: Bool = false) {
+    init(name: String?, isBot: Bool = false, bankRoll: Double) {
         self.name = name
         self.isBot = isBot
+        self.bankRoll = bankRoll
     }
 
     private(set) var isBot: Bool = false
-    private(set) var bankRoll: Double = 10.0
+    private(set) var bankRoll: Double
     private(set) var name: String?
     private(set) var id: UUID      = UUID()
     private(set) var cards: [Card] = []
@@ -19,17 +20,21 @@ class Player: Identifiable, Codable {
     }
 
     var totalCardValue: Double {
-        cards.reduce(0.0) { result, next in
+        cards
+            .filter { $0.state == .playable }
+            .reduce(0.0) { result, next in
             result + next.value
         }
     }
 
-    func receive(_ card: Card) {
+    @discardableResult
+    func receive(_ card: Card) -> Bool {
         guard self.bankRoll - card.value > 0.0 else {
-            return
+            return false
         }
         self.bankRoll -= card.value
         self.cards.append(card)
+        return true
     }
 
     func update() {

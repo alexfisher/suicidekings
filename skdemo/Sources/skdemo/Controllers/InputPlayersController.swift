@@ -25,7 +25,7 @@ final class InputPlayersController: BaseController {
     }
 
     private func getPlayerName() -> Player? {
-        let player = Player(name: console.ask("Player Name?"))
+        let player = Player(name: console.ask("Player Name?"), bankRoll: context.signature.bankRoll ?? 1.0)
         guard let name = player.name, !name.isEmpty else {
             return nil
         }
@@ -37,8 +37,8 @@ final class InputPlayersController: BaseController {
             return
         }
         
-        for _ in 0..<numberOfBots {
-            self.players.append(Player(name: .randomString(ofLength: 6), isBot: true))
+        for _ in 0..<(context.signature.botCount ?? numberOfBots) {
+            self.players.append(Player(name: .randomString(ofLength: 6), isBot: true, bankRoll: context.signature.bankRoll ?? 1.0))
         }
     }
     

@@ -113,6 +113,7 @@ class GameSession: Identifiable, Codable {
             self.state = .waitingForPlayers
         }
         votingRound.close()
+        self.principleAmount -= votingRound.burnedValue
         self.completedRounds += 1
     }
 
@@ -128,19 +129,19 @@ class GameSession: Identifiable, Codable {
 }
 
 struct GameSessionSettings: Codable {
-    init(           liquidity: Double = 10_000, 
-                xpAwardAmount: Double = 100_0, 
-                numberOfRound: Int    = 10_0,
-                 interestRate: Double = 0_05,
-            compoundFrequency: Double = 3_0,
-     interestRateSeriesLegnth: Int    = 1_0)
+    init(           liquidity: Double = 10000, 
+                xpAwardAmount: Double = 100,
+                numberOfRound: Int    = 10,
+                 interestRate: Double = 5,
+            compoundFrequency: Double = 3,
+     interestRateSeriesLength: Int    = 1)
     {
         self.liquidity                 = liquidity
         self.xpAwardAmount             = xpAwardAmount
         self.numberOfRound             = numberOfRound
         self.interestRate              = interestRate
         self.compoundFrequency         = compoundFrequency
-        self.interestRateSeriesLegnth  = interestRateSeriesLegnth
+        self.interestRateSeriesLength  = interestRateSeriesLength
     }
 
     let          liquidity: Double
@@ -148,5 +149,5 @@ struct GameSessionSettings: Codable {
     let      numberOfRound: Int
     let       interestRate: Double
     let  compoundFrequency: Double
-    let interestRateSeriesLegnth: Int
+    let interestRateSeriesLength: Int
 }

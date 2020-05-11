@@ -158,6 +158,9 @@ final class Card: Hashable, Identifiable, Comparable, Codable, CustomStringConve
         case .playable:
             return 1
         case .burned:
+            if level == 1 {
+                return 2
+            }
             return Int(pow(Double(level), 2.0))
         case .discarded:
             return 0
@@ -169,11 +172,11 @@ final class Card: Hashable, Identifiable, Comparable, Codable, CustomStringConve
     }
 
     var asPipAndXP: String {
-        "\(asPip)" + String(format: " (xp: %.2f)", points)
+        "\(pip.asPip)" + String(format: " (xp: %.2f)", points)
     }
 
     var asPipAndLevel: String {
-        "LVL \(level) \(asPip)"
+        "LVL \(level)\t(\(pip.asPip))"
     }
 
     var description: String {
@@ -204,6 +207,10 @@ extension Card {
         self.pip.asciiArt.pip.consoleText(color: color.consoleColor) + " (" +
         self.color.rawValue.uppercased().consoleText(color: color.consoleColor) + ")\n" +
         self.pip.asciiArt.art.consoleText(color: color.consoleColor)
+    }
+    
+    var consoleTextShort: ConsoleText {
+        "\(pip.asPip) (xp: \(String(format: "%.2f", points)); lvl \(level))".consoleText(color: color.consoleColor)
     }
 }
 

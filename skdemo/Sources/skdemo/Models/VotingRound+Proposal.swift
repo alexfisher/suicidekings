@@ -5,8 +5,15 @@ extension VotingRound {
 
         static func random(levelCap: Int) -> VotingRound.Proposal {
             switch Int.random(in: 0...1) {
-                case 0: return .earnInterest(on: .random(levelCap: levelCap))
-                case 1: return .increaseVotingPower(for: .random(levelCap: levelCap))
+                case 0:
+                    return .earnInterest(on: .random(levelCap: levelCap))
+                case 1:
+                    let proposal: Proposal = .increaseVotingPower(for: .random(levelCap: levelCap))
+                    guard case(.level) = proposal.characteristic else {
+                        return proposal
+                    }
+                    // Can't vote for increasing XP for specific levels
+                    return random(levelCap: levelCap)
             default: fatalError()
             }
         }
