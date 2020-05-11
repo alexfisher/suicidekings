@@ -8,5 +8,12 @@ struct PlayerSession: Codable {
     var player: Player? {
         GameServer.shared[playerID: playerID]
     }
+    
+    var allEligibleCards: [Card] {
+        player?
+            .cards
+            .filter { $0.state == .playable }
+            ?? []
+    }
 }
 

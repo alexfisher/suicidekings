@@ -80,7 +80,7 @@ final class GameSessionController: BaseController {
     }
     
     private func dealStartingCardsIfNecssary() {
-        guard let cardCount = context.signature.cardsToStart, self.state.gameSession.completedRounds == 0 else {
+        guard let cardCount = context.signature.cardsToStart , self.state.gameSession.completedRounds == 0 else {
             return
         }
         

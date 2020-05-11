@@ -29,7 +29,33 @@ extension VotingRound {
                 result + next.votes
             }
         }
-
+        
+        var isBot: Bool {
+            playerSession.player?.isBot ?? false
+        }
+        
+        var playerCards: [Card] {
+            playerSession.player?
+                .cards
+                .filter({ $0.state != .discarded })
+                .sorted()
+                ?? []
+        }
+        
+        var cardsPlayable: [Card] {
+            playerCards.filter { $0.state == .playable }
+        }
+        
+        var cardsBurned: [Card] {
+            playerCards.filter { $0.state == .burned}
+        }
+        
+        var burnedCardsValue: Double {
+            cardsBurned.reduce(0.0) { result, next in
+                result + next.value
+            }
+        }
+        
         var availableVotes: Int {
             (playerSession.player?.votes ?? 0) - castedVotes
         }
@@ -50,8 +76,12 @@ extension VotingRound {
             return Result()
         }
         
+        var highestCard: Card? {
+            cardsPlayable.sorted(by: >).first
+        }
+        
         var highestCardLevel: Int {
-            playerSession.player?.cards.sorted(by: >).first?.level ?? 0
+            highestCard?.level ?? 0
         }
     }
 }
