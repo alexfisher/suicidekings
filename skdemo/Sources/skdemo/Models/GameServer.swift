@@ -1,6 +1,6 @@
 import Foundation
 
-final class GameServer: Codable {
+public final class GameServer: Codable {
     private enum CodingKeys: String, CodingKey {
         case players, gameSessions
     }
@@ -9,10 +9,10 @@ final class GameServer: Codable {
 
     private let queue = DispatchQueue(label: "suicidekings.gameserver.io.queue")
 
-    private(set) var players: [Player] = []
-    private(set) var gameSessions: [GameSession] = []
+    public private(set) var players: [Player] = []
+    public private(set) var gameSessions: [GameSession] = []
 
-    subscript(gameSessionID id: UUID) -> GameSession? {
+    public subscript(gameSessionID id: UUID) -> GameSession? {
         queue.sync {
             gameSessions.first(where: {
                 $0.id == id
@@ -20,7 +20,7 @@ final class GameServer: Codable {
         }
     }
 
-    subscript(playerID id: UUID) -> Player? {
+    public subscript(playerID id: UUID) -> Player? {
         queue.sync {
             players.first(where: {
                 $0.id ==  id
@@ -28,7 +28,7 @@ final class GameServer: Codable {
         }
     }
 
-    subscript(playerName name: String) -> [Player] {
+    public subscript(playerName name: String) -> [Player] {
         queue.sync {
             players.filter {
                 $0.name == name
@@ -36,7 +36,7 @@ final class GameServer: Codable {
         }
     }
 
-    func add(_ gameSession: GameSession) {
+    public func add(_ gameSession: GameSession) {
         guard self[gameSessionID: gameSession.id] == nil else {
             return
         }
@@ -46,7 +46,7 @@ final class GameServer: Codable {
         }
     }
 
-    func add(_ player: Player) {
+    public func add(_ player: Player) {
         guard self[playerID: player.id] == nil else {
             return
         }
@@ -55,11 +55,11 @@ final class GameServer: Codable {
         }
     }
 
-    func reset() {
+    public func reset() {
         self.players.removeAll()
         self.gameSessions.removeAll()
     }
 
-    static var shared = GameServer()
+    public static var shared = GameServer()
 }
 

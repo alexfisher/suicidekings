@@ -64,8 +64,6 @@ final class GameSessionController: BaseController {
             self.state.gameSession.join(players: gameServer.players)
             
             while var votingRound = self.state.gameSession.beginVoting() {
-                self.dealStartingCardsIfNecssary()
-
                 self.push(child: VotingRoundController(with: context, votingRound: votingRound))
                 self.state.gameSession.end(votingRound: &votingRound)
             }
@@ -76,18 +74,6 @@ final class GameSessionController: BaseController {
         if case(.stopping) = self.state {
             self.console.output("|> Disconnecting to server...".consoleText(.info))
             self.state.gameSession.stop(on: &gameServer)
-        }
-    }
-    
-    private func dealStartingCardsIfNecssary() {
-        guard let cardCount = context.signature.cardsToStart , self.state.gameSession.completedRounds == 0 else {
-            return
-        }
-        
-        self.state.gameSession.playerSessions.forEach {
-            for _ in 0..<cardCount {
-                $0.player?.receive(Card())
-            }
         }
     }
 }
