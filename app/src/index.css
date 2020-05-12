@@ -12,6 +12,37 @@ code {
     monospace;
 }
 
+.App {
+  text-align:left;
+}
+
+.AppHeader {
+
+}
+
+.AppHeader .AppTitle img {
+  float: left;
+}
+
+.AppMain {
+  clear: both;
+}
+
+.AppTitle {
+  
+}
+
+.ComponentTitle {
+  font-weight: bold;
+  margin: 1em 0 1em 0;
+}
+
 .AccountInfo h4 {
   font-weight: normal;
+  margin: unset;
 }
+
+.AccountInfo p {
+  margin: unset;
+}
+
