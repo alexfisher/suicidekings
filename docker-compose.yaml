@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  truffle:
+    build: .
+    depends_on:
+      - ganache
+    networks: 
+      - network
+    volumes:
+      - ./contracts:/truffle/contracts
+  ganache:
+    image: trufflesuite/ganache-cli
+    restart: unless-stopped
+    networks: 
+      - network
+    ports:
+      - 8545:8545
+      - 8546:8546
+    command: -d --fork ${FORKCHAIN} --gasLimit "90000000" --mnemonic ${MNEMONIC} --networkId "999" --block-time "5"
+
+networks:
+  network:
+
+# Revisit this:
+# https://github.com/lzhou1110/drizzle-truffle-ganache-docker-box/blob/master/docker-compose-dev.yml
+
