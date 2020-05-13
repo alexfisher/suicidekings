@@ -41,6 +41,28 @@ _truffle(develop)>_`migrate --reset`
 
 `npm run start`
 
+## Running on Local Blockchain Forked from Mainnet ##
+
+1. Start Ganache-cli (terminal 1):
+
+`ganache-cli -f https://mainnet.infura.io/v3/3b0206f022a6462cacf91dc79e2b9833 -m "myth like bonus scare over problem client lizard pioneer submit female collect" -i 999`
+
+2. Connect on Truffle and deploy (terminal 2):
+
+`truffle console --network mainnetfork`
+
+`migrate`
+
+3. Start web app (terminal 3):
+
+`cd app`
+
+`npm run start`
+
+4. Configure Metamask:
+
+Seed with the same mnemonic as you used in ganache-cli, and change network to use localhost:8545 and Network ID 999.
+
 ## Running on Testnets/Infura ##
 Create a `secrets.json` file in the project root (same level as truffle-config.js).  It should contain a mnemonic (you can generate via ganache/ganache-cli) and infura API Key (sign-up for free at infura.io)
 
