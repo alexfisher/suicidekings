@@ -41,7 +41,7 @@ _truffle(develop)>_`migrate --reset`
 
 `npm run start`
 
-## Running on Ropsten/Infura ##
+## Running on Testnets/Infura ##
 Create a `secrets.json` file in the project root (same level as truffle-config.js).  It should contain a mnemonic (you can generate via ganache/ganache-cli) and infura API Key (sign-up for free at infura.io)
 
 ```
@@ -52,7 +52,9 @@ Create a `secrets.json` file in the project root (same level as truffle-config.j
 ```
 Then, be sure to start truffle using:
 
-`truffle console --network ropsten`
+`truffle console --network kovan`
+
+Also support for `ropsten`, but it has been very slow lately.  Like, Bitcoin slow.
 
 And, in your browser be sure to switch Metamask to Ropsten and seed it with the correct mnemonic (Logout and Restore).
 
