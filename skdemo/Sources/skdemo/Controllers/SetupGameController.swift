@@ -68,7 +68,7 @@ final class SetupGameController: BaseController {
             let rounds    = context.signature.rounds ?? 100
             let rate      = context.signature.rate ?? 5.0
             let settings  = GameSessionSettings(
-                         liquidity: liquidity, 
+                         liquidity: liquidity,
                      numberOfRound: rounds,
                       interestRate: rate)
             

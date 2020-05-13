@@ -11,14 +11,6 @@ class VotingRoundController: BaseController, BallotControllerDelegate {
     fileprivate var votingRound: VotingRound
     private var amounts: (Double, Double) = (0, 0)
 
-    func drawBanner() {
-        self.console.output("""
-            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            | ROUND #\(self.votingRound.id)
-            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            """.consoleText(.warning))
-    }
-
     // MARK: Overrides
     override func start() {
         defer {
@@ -28,9 +20,10 @@ class VotingRoundController: BaseController, BallotControllerDelegate {
         defer { self.console.popEphemeral() }
         self.console.pushEphemeral()
         
-        self.drawBanner()
         self.dealFirstRoundCards()
         self.autoBuyCards()
+        
+        self.console.clear(.screen)
         
         self.amounts = calculateAccruedInterest()
 
@@ -42,16 +35,32 @@ class VotingRoundController: BaseController, BallotControllerDelegate {
         }
         
         console.output("|> Finalizing Round #\(votingRound.id):".consoleText(.info))
-        drawCalculatedVotingPower()
         drawCalculatedEarnedInterest(amounts.0)
+        drawCalculatedVotingPower()
         drawBurntCardValue()
 
         _ = self.console.ask("Press 'any' key...")
     }
     
     func controllerWillAppear(_ controller: BallotController) {
+        self.console.output("""
+            | ROUND #\(self.votingRound.id)
+            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            """.consoleText(color: .brightWhite))
+        
         draw(in: controller.console, accruedInterest: self.amounts.0, principleAmount: self.amounts.1)
-        drawCardStatistics(in: controller.console, cardSet: self.votingRound.playableCards)
+
+        self.console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            .consoleText(color: .brightWhite))
+    }
+    
+    func controllerWillViewAllCards(_ controller: BallotController) {
+        drawCardStatistics(in: controller.console, title: "ALL CARDS", cardSet: self.votingRound.playableCards)
+        
+        self.console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            .consoleText(color: .brightWhite))
+        
+        _ = controller.console.ask("Press 'any' key...")
     }
     
     private func dealFirstRoundCards() {
@@ -125,10 +134,10 @@ class VotingRoundController: BaseController, BallotControllerDelegate {
     }
     
     private func draw(in console: Console, accruedInterest: Double, principleAmount: Double) {
-        console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+        // console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
         console.output("|> Interest Accrued : \(String(format: "%.4f", accruedInterest))".consoleText(.info))
         console.output("|> New Principle    : \(String(format: "%.4f", principleAmount))".consoleText(.info))
-        console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+        // console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
     }
 
     private func drawCalculatedEarnedInterest(_ accruedInterest: Double) {
@@ -194,7 +203,8 @@ class VotingRoundController: BaseController, BallotControllerDelegate {
             
             let percentString = String(format: "%.2f", percent * 100.0)
             let reward = (percent * valueAwardedThisRound)
-            console.output("|>\t- \(percentString)%:\t\"\(characteristic)\" has \(cardsMatching.count) eligible cards (+\(percentString) XP ea.)".consoleText())
+            let rewardString = String(format: "%.2f", reward)
+            console.output("|>\t- \(percentString)%:\t\"\(characteristic)\" has \(cardsMatching.count) eligible cards (+\(rewardString) XP ea.)".consoleText())
             cardsMatching.forEach { card in
                 card.points += reward
             }
@@ -289,18 +299,20 @@ fileprivate func display(in console: Console, card: Card, playerName name: Strin
 
 protocol BallotControllerDelegate: class {
     func controllerWillAppear(_ controller: BallotController)
+    func controllerWillViewAllCards(_ controller: BallotController)
 }
 
 final class BallotController: BaseController {
     enum MenuChoice: String {
         case auto      = ""
-        case viewCards = "View Cards"
+        case viewHand  = "View My Cards"
+        case viewCards = "View All Cards"
         case burnCard  = "Burn Card"
         case buyACard  = "Buy a Card"
         case vote      = "Vote"
         
         static let allMenuChoices: [MenuChoice] = [
-            .viewCards, .burnCard, .buyACard, .vote
+            .viewHand, .viewCards, .burnCard, .buyACard, .vote
         ]
     }
     
@@ -312,39 +324,46 @@ final class BallotController: BaseController {
     
     // MARK: Properties (Private)
     private weak var delegate: BallotControllerDelegate?
-    private var ballot: VotingRound.Ballot
+    public private(set) var ballot: VotingRound.Ballot
     private var player: Player! { ballot.playerSession.player! }
 
     func drawTurn(forPlayer player: Player) {
-        let name = player.name ?? player.id.description
+        let name = (player.name ?? player.id.description).uppercased()
         let bank = String(format: "%.5f", player.bankRoll)
         let vals = String(format: "%.5f", player.totalCardValue)
         let hand = ballot.cardsPlayable
         let high = ballot.highestCard != nil ? "Highest: " + (ballot.highestCard?.consoleTextShort ?? "") : ""
 
+        /*
         console
             .output("|> \(String(repeating: "- ", count: name.count + 20))"
             .consoleText(color: .brightYellow))
-        console
-            .output("|> \(name)'s turn:"
-            .consoleText(.info))
-        console
-            .output("|> \(String(repeating: "- ", count: name.count + 20))"
-                .consoleText(color: .brightYellow))
-        console
-            .output("|> Cards: \(hand.count) ct.\t".consoleText(.info) + high)
-        console
-            .output("|> Votes: \(ballot.availableVotes)"
-            .consoleText(.info))
-        console
-            .output("|> Bank : \(bank) ETH"
-            .consoleText(.info))
-        console
-            .output("|> Value: \(vals) ETH"
-            .consoleText(.info))
-        console
-            .output("|> \(String(repeating: "- ", count: name.count + 20))"
-            .consoleText(color: .brightYellow))
+         */
+        
+        var output: ConsoleText = "\n"
+        output += "| \(name)'s turn:\n".consoleText(color: .brightWhite)
+        output += "|  - Cards: ".consoleText(color: .brightBlack) +
+                "\(hand.count) ct.\t".consoleText(color: .brightWhite) +
+                high + "\n"
+        output += "|  - Votes: ".consoleText(color: .brightBlack) +
+                "\(ballot.availableVotes)\n".consoleText(color: .brightWhite)
+        output += "|  - Bank : ".consoleText(color: .brightBlack) +
+                "\(bank) ETH\n".consoleText(color: .brightWhite)
+        output += "|  - Value: ".consoleText(color: .brightBlack) +
+                "\(vals) ETH\n".consoleText(color: .brightWhite)
+        
+        console.output(output)
+
+        /*
+        console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            .consoleText(color: .brightWhite))
+         */
+        
+
+        drawCardStatistics(in: console, title: "YOUR CARDS", cardSet: ballot.cardsPlayable)
+        
+        self.console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            .consoleText(color: .brightWhite))
     }
     
     func drawBankRoll(forPlayer player: Player) {
@@ -376,10 +395,9 @@ final class BallotController: BaseController {
             defer { self.console.popEphemeral() }
             self.console.pushEphemeral()
             
-            self.delegate?.controllerWillAppear(self)
-            
             // Show top-level stats
             //------------------------------------------------------------------
+            self.delegate?.controllerWillAppear(self)
             self.drawTurn(forPlayer: player)
 
             switch self.drawMenuChoices(for: player) {
@@ -400,16 +418,25 @@ final class BallotController: BaseController {
                 _ = console.ask("Press 'any' key...")
             // View cards
             //------------------------------------------------------------------
+            case .viewHand:
+                defer { self.console.popEphemeral() }
+                self.console.pushEphemeral()
+                
+                self.drawCardsInHand(for: player)
+                _ = console.ask("Press 'any' key...")
+
             case .viewCards:
                 defer { self.console.popEphemeral() }
                 self.console.pushEphemeral()
                 
-                self.console.clear(.screen)
-
-                drawCardStatistics(in: console, cardSet: ballot.playerCards.filter { $0.state == .playable})
-                drawCardsInHand(for: player)
+                self.delegate?.controllerWillViewAllCards(self)
                 
-                _ = console.ask("Press 'any' key...")
+                // self.console.clear(.screen)
+
+                // drawCardStatistics(in: console, cardSet: ballot.playerCards.filter { $0.state == .playable})
+                // drawCardsInHand(for: player)
+                
+                // _ = console.ask("Press 'any' key...")
             // Burn a card
             //------------------------------------------------------------------
             case .burnCard:
@@ -419,7 +446,7 @@ final class BallotController: BaseController {
                 drawCardsInHand(for: player)
 
                 console
-                    .ask("Which card? (comma-separated)")
+                    .ask("Burn which cards? (comma-separated)")
                     .components(separatedBy: ", ")
                     .compactMap(Int.init)
                     .map { (self.ballot.playerCards[$0], $0) }
@@ -509,12 +536,27 @@ final class BallotController: BaseController {
         ballot
             .playerCards
             .enumerated().forEach {
-            console.output(
-                    "|> \($0.1.state == .burned ? "🔥" : "\($0.0):") ".consoleText() +
-                    "LVL \($0.1.level) \t\($0.1.pip) ".consoleText(color: $0.1.color.consoleColor) +
-                    "\t\(String(format: "%.5f", $0.1.value)) ETH".consoleText(.plain) +
-                    "\t\(String(format: "%.5f", $0.1.points)) XP".consoleText(.plain)
-            )
+                let indexText  = $0.1.state == .burned ? "🔥" : "#\($0.0)"
+                let levelText  = "\(indexText)  LVL \($0.1.level)"
+                let idxPadding = String(repeating: " ", count: max(2, (6 - (indexText.count + levelText.count))))
+                
+                let pipText  = "\($0.element.pip.description) (\($0.element.color.rawValue) \($0.element.pip.rawValue))"
+                let pipColor = $0.element.color.consoleColor
+                let pipPadding = String(repeating: " ", count: max(2, (22 - pipText.count)))
+                
+                let valText    = "\(String(format: "%.5f", $0.1.value)) ETH"
+                let valPadding = String(repeating: " ", count: max(2, (8 - valText.count)))
+                
+                console.output(
+                    "|  - ".consoleText(color: .brightBlack)
+                    + levelText.consoleText(color: .brightCyan)
+                    + idxPadding.consoleText()
+                    + pipText.consoleText(color: pipColor)
+                    + pipPadding.consoleText()
+                    + valText.consoleText(color: .brightBlack)
+                    + valPadding.consoleText()
+                    + "   \(String(format: "%.5f", $0.1.points)) XP".consoleText(color: .brightBlack)
+                )
         }
     }
 
