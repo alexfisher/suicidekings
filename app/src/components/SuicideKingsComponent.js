@@ -33,7 +33,7 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
             <ContractData
               drizzle={drizzle}
               drizzleState={drizzleState}
-              contract="Compound"
+              contract="CETH"
               method="name"
             />
           </p>
@@ -42,7 +42,7 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
             <ContractData
               drizzle={drizzle}
               drizzleState={drizzleState}
-              contract="Compound"
+              contract="CETH"
               method="totalBorrows"
             />
           </p>
@@ -51,7 +51,7 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
             <ContractData
               drizzle={drizzle}
               drizzleState={drizzleState}
-              contract="Compound"
+              contract="CETH"
               method="totalSupply"
             />
           </p>
@@ -60,20 +60,17 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
             <ContractData
               drizzle={drizzle}
               drizzleState={drizzleState}
-              contract="Compound"
+              contract="CETH"
               method="balanceOf"
               methodArgs={[drizzleState.accounts[0]]}
             />
           </p>
           <div>
             <span>Mint 0.1 ETH worth of cETH: </span>
-            {
-              // Send 0.1 ETH for cETH
-            }
             <ContractForm
               drizzle={drizzle}
               drizzleState={drizzleState}
-              contract="Compound"
+              contract="CETH"
               method="mint"
               sendArgs={{value: 100000000000000000}}
             />

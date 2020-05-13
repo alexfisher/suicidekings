@@ -28,6 +28,10 @@ module.exports = {
     ropsten: {
       provider: new HDWalletProvider(secrets.mnemonic, "https://ropsten.infura.io/v3/"+secrets.infuraApiKey),
       network_id: 3
+    },
+    kovan: {
+      provider: new HDWalletProvider(secrets.mnemonic, "https://kovan.infura.io/v3/"+secrets.infuraApiKey),
+      network_id: 42
     }
   }
 };
