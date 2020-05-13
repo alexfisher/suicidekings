@@ -5,7 +5,7 @@ import ListKingsComponent from "./ListKingsComponent";
 import logo from "../logo.png";
 
 //const { AccountData, ContractData, ContractForm } = newContextComponents;
-const { ContractForm } = newContextComponents;
+const { ContractForm, ContractData } = newContextComponents;
 
 const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
   return (
@@ -25,6 +25,59 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
         </div>
         <div className="ListKings">
           <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
+        </div>
+        <div className="CompoundInfo">
+          <div className="ComponentTitle">Compound Info:</div>
+          <p>
+            <span>Compound Contract Name: </span>
+            <ContractData
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="Compound"
+              method="name"
+            />
+          </p>
+          <p>
+            <span>Total Borrows: </span>
+            <ContractData
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="Compound"
+              method="totalBorrows"
+            />
+          </p>
+          <p>
+            <span>Total Supply: </span>
+            <ContractData
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="Compound"
+              method="totalSupply"
+            />
+          </p>
+          <p>
+            <span>Your cETH balance: </span>
+            <ContractData
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="Compound"
+              method="balanceOf"
+              methodArgs={[drizzleState.accounts[0]]}
+            />
+          </p>
+          <div>
+            <span>Mint 0.1 ETH worth of cETH: </span>
+            {
+              // Send 0.1 ETH for cETH
+            }
+            <ContractForm
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="Compound"
+              method="mint"
+              sendArgs={{value: 100000000000000000}}
+            />
+          </div>
         </div>
       </div>
 
