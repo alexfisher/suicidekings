@@ -20,10 +20,22 @@ func calculateColorDistribution(_ cardSet: [Card]) -> ConsoleText {
     
     return mappedGrouping
         .reduce(ConsoleText()) { result, next in
-            result +
-                "|> .: \(next.0.rawValue) \t".consoleText(color: next.0.consoleColor) +
-                String(format: "%.0f", next.1 * 100.0).consoleText() + "%" +
-                "\tx\(next.2)\n".consoleText(.info)
+            let textColor = next.0.consoleColor
+            let cardText  = next.0.rawValue
+            let padding   = String(repeating: " ", count: 13 - cardText.count)
+            
+            let percent     = next.1 * 100.0
+            let percentText = String(format: "%.0f", percent).consoleText(color: .brightWhite)
+            
+            let cardCount = next.2
+            let countText = "x\(cardCount)\n".consoleText(color: .brightWhite)
+            
+            return result +
+                "|  - ".consoleText(.info)
+                + cardText.consoleText(color: textColor)
+                + padding.consoleText(color: .green)
+                + percentText + "%\t".consoleText(color: .brightWhite)
+                + countText
     }
 }
 
@@ -45,10 +57,21 @@ func calculatePipDistribution(_ cardSet: [Card]) -> ConsoleText {
 
     return mappedGrouping
         .reduce(ConsoleText()) { result, next in
-            result +
-                "|> .: \(next.0.description):\t".consoleText() +
-                String(format: "%.0f", next.1 * 100.0).consoleText() + "%" +
-                "\tx\(next.2)\n".consoleText(.info)
+            let cardText  = "\(next.0.description) (\(next.0.rawValue)) "
+            let padding   = String(repeating: " ", count: 13 - cardText.count)
+            
+            let percent     = next.1 * 100.0
+            let percentText = String(format: "%.0f", percent).consoleText(color: .brightWhite)
+            
+            let cardCount = next.2
+            let countText = "x\(cardCount)\n".consoleText(color: .brightWhite)
+            
+            return result +
+                "|  - ".consoleText(.info)
+                + cardText.consoleText(color: .brightBlack)
+                + padding.consoleText(color: .green)
+                + percentText + "%\t".consoleText(color: .brightWhite)
+                + countText
     }
 }
 
@@ -70,23 +93,34 @@ func calculateLevelDistribution(_ cardSet: [Card]) -> ConsoleText {
     
     return mappedGrouping
         .reduce(ConsoleText()) { result, next in
-            result +
-                "|> .: LVL: \(next.0)\t".consoleText() +
-                String(format: "%.0f", next.1 * 100.0).consoleText() + "%" +
-                "\tx\(next.2)\n".consoleText(.info)
+            let cardText  = "LVL \(next.0) "
+            let padding   = String(repeating: " ", count: 13 - cardText.count)
+            
+            let percent     = next.1 * 100.0
+            let percentText = String(format: "%.0f", percent).consoleText(color: .brightWhite)
+            
+            let cardCount = next.2
+            let countText = "x\(cardCount)\n".consoleText(color: .brightWhite)
+            
+            return result +
+                "|  - ".consoleText(.info)
+                + cardText.consoleText(color: .brightBlack)
+                + padding.consoleText(color: .green)
+                + percentText + "%\t".consoleText(color: .brightWhite)
+                + countText
     }
 }
 
-func drawCardStatistics(in console: Console, cardSet allEligibleCards: [Card]) {
-    console.output("|> Total Cards: \(allEligibleCards.count)".consoleText(.warning))
+func drawCardStatistics(in console: Console, title: String, cardSet allEligibleCards: [Card]) {
+    console.output("| \(title): \(allEligibleCards.count)".consoleText(color: .brightWhite))
     
-    console.output("|> + By Color:".consoleText(.info))
+    console.output("| [COLOR]".consoleText(.info))
     console.output(calculateColorDistribution(allEligibleCards))
     
-    console.output("|> + By Pip:".consoleText(.info))
+    console.output("| [SUIT]".consoleText(.info))
     console.output(calculatePipDistribution(allEligibleCards))
     
-    console.output("|> + By Level:".consoleText(.info))
+    console.output("| [LEVEL]".consoleText(.info))
     console.output(calculateLevelDistribution(allEligibleCards))
 }
 

@@ -12,7 +12,7 @@ public class Player: Identifiable, Codable {
     public private(set) var id         :UUID      = UUID()
     public private(set) var isBot      :Bool = false
     public private(set) var name       :String?
-    
+
     private func credit(_ amount: Double) {
         self.bankRoll += amount
     }
@@ -64,11 +64,6 @@ public class Player: Identifiable, Codable {
 
     public func discard() {
         self.cards.forEach {
-            /*
-            if $0.state == .burned {
-                self.bankRoll += $0.value
-            }
-             */
             $0.discard()
         }
     }
