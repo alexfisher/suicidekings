@@ -1,8 +1,8 @@
 import Foundation
 import ConsoleKit
 
-class GameSession: Identifiable, Codable {
-    enum State: String, Codable {
+public class GameSession: Identifiable, Codable {
+    public enum State: String, Codable {
         case initialized
         case started
         case waitingForPlayers
@@ -10,29 +10,30 @@ class GameSession: Identifiable, Codable {
         case stopped
     }
 
-    convenience init(startingAmount principleAmount: Double,
-                              valueAwardedEachRound: Double)
-    {
-        self.init(settings: GameSessionSettings(liquidity: principleAmount, 
-                                            xpAwardAmount: valueAwardedEachRound))
-    }
-
-    init(settings: GameSessionSettings) {
+    public init(settings: GameSessionSettings) {
         self.settings = settings
         self.principleAmount = settings.liquidity
     }
 
-    private(set) var settings: GameSessionSettings
-    private(set) var state: State = .initialized
-    private(set) var completedRounds: Int = 0
+    public private(set) var settings: GameSessionSettings
+    public private(set) var state: State = .initialized
+    public private(set) var completedRounds: Int = 0
 
-    private(set) var principleAmount: Double
-    var valueAwardedEachRound: Double { settings.xpAwardAmount }
+    public private(set) var principleAmount: Double
+    public var valueAwardedEachRound: Double { settings.xpAwardAmount }
 
-    private(set) var id: UUID = UUID()
-    private(set) var playerSessions: [PlayerSession] = []
-
-    func join(player: Player) {
+    public private(set) var id: UUID = UUID()
+    public private(set) var playerSessions: [PlayerSession] = []
+    
+    public func deposit(_ amount: Double) {
+        self.principleAmount += amount
+    }
+    
+    public func withdrawl(_ amount: Double) {
+        self.principleAmount -= amount
+    }
+    
+    public func join(player: Player) {
         // Players cannot join session already in-progress
         guard case(.waitingForPlayers) = self.state else {
             return
@@ -47,23 +48,23 @@ class GameSession: Identifiable, Codable {
             return
         }
 
-        let playerSession = PlayerSession(playerID: player.id, sessionID: self.id, joinedAt: Date())
+        let playerSession = PlayerSession(playerID: player.id, gameSessionID: self.id)
         self.playerSessions.append(playerSession)
     }
 
-    func join(players: Player...) {
+    public func join(players: Player...) {
         players.forEach {
             self.join(player: $0)
         }
     }
 
-    func join(players: [Player]) {
+    public func join(players: [Player]) {
         players.forEach {
             self.join(player: $0)
         }
     }
 
-    func dealCards() {
+    public func dealCards() {
         self
             .playerSessions
             .compactMap { $0.player }
@@ -72,7 +73,7 @@ class GameSession: Identifiable, Codable {
             }
     }
 
-    func accrueInterest(atRate interestRate: Double, occuring frequency: Double = 4.0, overTime iterations: Int = 1) -> Double {
+    public func accrueInterest(atRate interestRate: Double, occuring frequency: Double = 4.0, overTime iterations: Int = 1) -> Double {
         guard frequency > 0  else {
             return principleAmount
         }
@@ -86,7 +87,7 @@ class GameSession: Identifiable, Codable {
         return newPrincipleAmount - principleAmount
     }
 
-    func start(on gameServer: inout GameServer) {
+    public func start(on gameServer: inout GameServer) {
         guard case(.initialized) = self.state else {
             return
         }
@@ -96,7 +97,7 @@ class GameSession: Identifiable, Codable {
         gameServer.add(self)
     }
 
-    func beginVoting() -> VotingRound? {
+    public func beginVoting() -> VotingRound? {
         guard case(.waitingForPlayers) = self.state, self.completedRounds < self.settings.numberOfRound else
         {
             return nil
@@ -108,28 +109,27 @@ class GameSession: Identifiable, Codable {
         return VotingRound(id: self.completedRounds, playerSessions: self.playerSessions)
     }
 
-    func end(votingRound: inout VotingRound) {
+    public func end(votingRound: inout VotingRound) {
         defer {
             self.state = .waitingForPlayers
         }
         votingRound.close()
-        self.principleAmount -= votingRound.burnedValue
         self.completedRounds += 1
     }
 
-    func stop(on gameServer: inout GameServer) {
+    public func stop(on gameServer: inout GameServer) {
         self.state = .stopped
     }
 
-    func hasPlayerJoined(_ player: Player) -> Bool {
+    public func hasPlayerJoined(_ player: Player) -> Bool {
         self.playerSessions
             .map { $0.playerID }
             .contains(player.id)
     }
 }
 
-struct GameSessionSettings: Codable {
-    init(           liquidity: Double = 10000, 
+public struct GameSessionSettings: Codable {
+    public init(           liquidity: Double = 10000,
                 xpAwardAmount: Double = 100,
                 numberOfRound: Int    = 10,
                  interestRate: Double = 5,
@@ -144,10 +144,10 @@ struct GameSessionSettings: Codable {
         self.interestRateSeriesLength  = interestRateSeriesLength
     }
 
-    let          liquidity: Double
-    let      xpAwardAmount: Double
-    let      numberOfRound: Int
-    let       interestRate: Double
-    let  compoundFrequency: Double
-    let interestRateSeriesLength: Int
+    public let          liquidity: Double
+    public let      xpAwardAmount: Double
+    public let      numberOfRound: Int
+    public let       interestRate: Double
+    public let  compoundFrequency: Double
+    public let interestRateSeriesLength: Int
 }

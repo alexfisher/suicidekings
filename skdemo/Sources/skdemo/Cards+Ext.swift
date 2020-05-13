@@ -46,7 +46,7 @@ func calculatePipDistribution(_ cardSet: [Card]) -> ConsoleText {
     return mappedGrouping
         .reduce(ConsoleText()) { result, next in
             result +
-                "|> .: \(next.0.asPip):\t".consoleText() +
+                "|> .: \(next.0.description):\t".consoleText() +
                 String(format: "%.0f", next.1 * 100.0).consoleText() + "%" +
                 "\tx\(next.2)\n".consoleText(.info)
     }

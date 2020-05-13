@@ -1,6 +1,6 @@
 import Foundation
 import ConsoleKit
-class VotingRoundController: BaseController {
+class VotingRoundController: BaseController, BallotControllerDelegate {
     // MARK: Initialization
     init(with context: AppContext, votingRound: VotingRound) {
         self.votingRound = votingRound
@@ -14,7 +14,7 @@ class VotingRoundController: BaseController {
     func drawBanner() {
         self.console.output("""
             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            | ROUND ID: \(self.votingRound.id)
+            | ROUND #\(self.votingRound.id)
             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             """.consoleText(.warning))
     }
@@ -29,75 +29,85 @@ class VotingRoundController: BaseController {
         self.console.pushEphemeral()
         
         self.drawBanner()
-        
-        self.console.pushEphemeral()
+        self.dealFirstRoundCards()
         self.autoBuyCards()
-        self.console.popEphemeral()
         
         self.amounts = calculateAccruedInterest()
 
         self.votingRound.ballots.forEach {
-            guard !$0.isBot else {
-                let votes  = Int.random(in: 1...$0.availableVotes)
-                let _      = try? $0.mark(choice: .random(withVotes: votes, levelCap: $0.highestCardLevel))
-                return
-            }
+            defer { self.console.popEphemeral() }
+            self.console.pushEphemeral()
             
-            defer { console.popEphemeral()}
-            console.pushEphemeral()
-            
-            self.push(child: BallotController(with: context, votingRound: self.votingRound, displayAmounts: { self.draw(in: $0, accruedInterest: self.amounts.0, principleAmount: self.amounts.1) }, ballot: $0))
+            self.push(child: BallotController(with: context, ballot: $0, delegate: self))
         }
         
         console.output("|> Finalizing Round #\(votingRound.id):".consoleText(.info))
         drawCalculatedVotingPower()
         drawCalculatedEarnedInterest(amounts.0)
-        if votingRound.burnedValue > 0 {
-            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-            console.output("|> Burned Value : \(String(format: "%.4f", votingRound.burnedValue))".consoleText(.info))
-            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-        }
+        drawBurntCardValue()
 
         _ = self.console.ask("Press 'any' key...")
     }
     
-    private func autoBuyCards() {
-        var didDealCards = false
-        self.dealCards { player, cards in
-            didDealCards = true
-            self.console.output("|> \(player.name ?? player.id.description) received:\t\(cards.count) cards".consoleText(.info))
-        }
-        
-        if didDealCards {
-            _ = self.console.ask("Press 'any' key...")
+    func controllerWillAppear(_ controller: BallotController) {
+        draw(in: controller.console, accruedInterest: self.amounts.0, principleAmount: self.amounts.1)
+        drawCardStatistics(in: controller.console, cardSet: self.votingRound.playableCards)
+    }
+    
+    private func dealFirstRoundCards() {
+        if self.votingRound.id == 0, let cardsToStart = self.context.signature.cardsToStart, cardsToStart > 0 {
+            self.votingRound.ballots.forEach { ballot in
+                guard let player = ballot.playerSession.player else {
+                    return
+                }
+                var card: Card?
+                repeat {
+                    card = ballot.playerSession.draw()
+                } while (player.cards.count < cardsToStart) || card == nil
+            }
         }
     }
+    
+    private func drawBurntCardValue() {
+        let burntThisRound = votingRound
+            .ballots
+            .flatMap { $0.burntCards }
+            .reduce(0.0) { result, next in
+                result + next.value
+        }
+        if burntThisRound > 0 {
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            console.output("|> Deposits Returned This Round: \(String(format: "%.4f", burntThisRound))".consoleText(.info))
+            console.output("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+        }
+    }
+    
+    private func autoBuyCards() {
+        defer { self.console.popEphemeral() }
+        self.console.pushEphemeral()
+        
+        var didDealCards = false
+        self.votingRound.ballots.forEach { ballot in
+            guard let player = ballot.playerSession.player else {
+                return
+            }
 
-    private func dealCards(_ callback: ((Player, [Card]) -> Void)? = nil) {
-        for player in votingRound.ballots
-            .compactMap({ $0.playerSession })
-            .compactMap({ $0.player }) {
-                var dealACard = true
-                var cardsDealt = [Card]()
-                while dealACard {
-                    let card  = Card()
-                    
-                    if player.isBot {
-                        dealACard = player.receive(card)
-                    } else if context.signature.autoBuys {
-                        dealACard = player.receive(card)
-                    } else {
-                        dealACard = false
-                    }
+            var cards = [Card]()
+            
+            switch (context.signature.autoBuys, player.isBot) {
+                case (_,      true) : fallthrough
+                case (true,  false) : cards = ballot.playerSession.autoDraw()
+                default: break
+            }
+            
+            if cards.count > 0 && !player.isBot {
+                didDealCards = true
+                self.console.output("|> \(player.name ?? player.id.description) received:\t\(cards.count) cards".consoleText(.info))
+            }
+        }
 
-                    if dealACard {
-                        cardsDealt.append(card)
-                    }
-                }
-
-                if cardsDealt.count > 0 {
-                    callback?(player, cardsDealt)
-                }
+        if didDealCards {
+            _ = self.console.ask("Press 'any' key...")
         }
     }
 
@@ -277,6 +287,10 @@ fileprivate func display(in console: Console, card: Card, playerName name: Strin
         .output(card.consoleText)
 }
 
+protocol BallotControllerDelegate: class {
+    func controllerWillAppear(_ controller: BallotController)
+}
+
 final class BallotController: BaseController {
     enum MenuChoice: String {
         case auto      = ""
@@ -290,18 +304,16 @@ final class BallotController: BaseController {
         ]
     }
     
-    init(with context: AppContext, votingRound: VotingRound, displayAmounts: ((Console) -> ())? = nil, ballot: VotingRound.Ballot) {
-        self.displayAmounts = displayAmounts
-        self.votingRound = votingRound
-        self.ballot      = ballot
+    init(with context: AppContext, ballot: VotingRound.Ballot, delegate: BallotControllerDelegate? = nil) {
+        self.ballot   = ballot
+        self.delegate = delegate
         super.init(with: context)
     }
-
+    
     // MARK: Properties (Private)
-    private let votingRound: VotingRound
+    private weak var delegate: BallotControllerDelegate?
     private var ballot: VotingRound.Ballot
     private var player: Player! { ballot.playerSession.player! }
-    private var displayAmounts: ((Console) -> ())?
 
     func drawTurn(forPlayer player: Player) {
         let name = player.name ?? player.id.description
@@ -354,22 +366,22 @@ final class BallotController: BaseController {
         defer { self.console.popEphemeral() }
         self.console.pushEphemeral()
         
-        if ballot.playerCards.isEmpty {
-            player.receive(Card())
+        guard !self.ballot.isBot else {
+            self.ballot.playerSession.autoDraw()
+            try! self.ballot.autoVote()
+            return
         }
         
-        while ballot.availableVotes > 0 {
+        while ballot.canVote {
             defer { self.console.popEphemeral() }
             self.console.pushEphemeral()
             
+            self.delegate?.controllerWillAppear(self)
+            
             // Show top-level stats
             //------------------------------------------------------------------
-            if !player.isBot {
-                self.displayAmounts?(self.console)
-                drawCardStatistics(in: console, cardSet: self.votingRound.playableCards)
-                self.drawTurn(forPlayer: player)
-            }
-            
+            self.drawTurn(forPlayer: player)
+
             switch self.drawMenuChoices(for: player) {
             // Buy a card
             //------------------------------------------------------------------
@@ -377,8 +389,7 @@ final class BallotController: BaseController {
                 defer { self.console.popEphemeral() }
                 self.console.pushEphemeral()
                 
-                let card = Card()
-                guard self.player.receive(card) else {
+                guard let card = ballot.playerSession.draw() else {
                     console.error("|> Insufficient funds")
                     continue
                 }
@@ -407,11 +418,18 @@ final class BallotController: BaseController {
                 
                 drawCardsInHand(for: player)
 
-                console.ask("Which card? (comma-separated)")
+                console
+                    .ask("Which card? (comma-separated)")
                     .components(separatedBy: ", ")
-                    .compactMap(Int.init).forEach {
-                        burnCard(atIndex: $0, forPlayer: player)
-                }
+                    .compactMap(Int.init)
+                    .map { (self.ballot.playerCards[$0], $0) }
+                    .forEach { (card: Card?, index: Int) in
+                        guard let card = card else {
+                            return
+                        }
+                        self.burnCard(card, atIndex: index, forPlayer: player)
+            }
+                
                 _ = console.ask("Press 'any' key...")
             // Vote for proposals
             //------------------------------------------------------------------
@@ -493,24 +511,27 @@ final class BallotController: BaseController {
             .enumerated().forEach {
             console.output(
                     "|> \($0.1.state == .burned ? "🔥" : "\($0.0):") ".consoleText() +
-                    "\($0.1.asPipAndLevel) ".consoleText(color: $0.1.color.consoleColor) +
+                    "LVL \($0.1.level) \t\($0.1.pip) ".consoleText(color: $0.1.color.consoleColor) +
                     "\t\(String(format: "%.5f", $0.1.value)) ETH".consoleText(.plain) +
                     "\t\(String(format: "%.5f", $0.1.points)) XP".consoleText(.plain)
             )
         }
     }
 
-    private func burnCard(atIndex index: Int, forPlayer player: Player) {
-        let card = ballot.playerCards[index]
-
+    private func burnCard(_ card: Card, atIndex index: Int, forPlayer player: Player) {
         guard card.level > 0 else {
             console.error("|> Cannot burn a 'Level 0' card!")
             return
         }
-        card.burn()
         
+        guard let _ = ballot.playerSession.burn(card: card.id) else {
+            return
+        }
+        
+        ballot.burntCards.append(card)
+
         let beginning = "|> \(player.name!) has burned #\(index) (".consoleText(color: .white)
-        let middle = "\(card.pip.asPip)".consoleText(color: card.color.consoleColor)
+        let middle = "\(card.pip)".consoleText(color: card.color.consoleColor)
         let end = ") for \(card.votes) votes!".consoleText(color: .white)
         console.output(beginning + middle + end)
     }
