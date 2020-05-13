@@ -3,7 +3,7 @@ import ComplexStorage from "./contracts/ComplexStorage.json";
 import SimpleStorage from "./contracts/SimpleStorage.json";
 import TutorialToken from "./contracts/TutorialToken.json";
 import SuicideKings from "./contracts/SuicideKings.json";
-import CETH from "./contracts/Compound.json";
+import CETH from "./other-contracts/Compound.json";
 
 const options = {
   web3: {
