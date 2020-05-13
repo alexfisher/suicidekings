@@ -55,16 +55,6 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
               method="totalSupply"
             />
           </p>
-          <p>
-            <span>Your cETH balance: </span>
-            <ContractData
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contract="CETH"
-              method="balanceOf"
-              methodArgs={[drizzleState.accounts[0]]}
-            />
-          </p>
           <div>
             <span>Mint 0.1 ETH worth of cETH: </span>
             <ContractForm
@@ -73,6 +63,26 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
               contract="CETH"
               method="mint"
               sendArgs={{value: 100000000000000000}}
+            />
+          </div>          
+          <div>
+            <span>Your cETH balance: </span>
+            <ContractData
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="CETH"
+              method="balanceOf"
+              methodArgs={[drizzleState.accounts[0]]}
+            />
+          </div>
+          <div>
+            <span>Convert cETH to ETH</span>
+            <ContractForm
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="CETH"
+              method="redeem"
+              labels={["Amount of cETH"]}
             />
           </div>
         </div>
