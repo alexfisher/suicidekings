@@ -21,14 +21,14 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
         </div>
       </div>
       <div className="AppMain">
-        <div className="MintKing">
+        <div className="MintKing section">
         <div className="ComponentTitle">Mint King: </div>
           <ContractForm drizzle={drizzle} contract="SuicideKings" method="mintKing" sendArgs={{gas: 800000}} />      
         </div>
-        <div className="ListKings">
+        <div className="ListKings section">
           <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
         </div>
-        <div className="CompoundInfo">
+        <div className="CompoundInfo section">
           <CompoundInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
         </div>
       </div>
