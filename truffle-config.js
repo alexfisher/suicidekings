@@ -28,7 +28,8 @@ module.exports = {
     mainnetfork: { // Useful for ganache-cli started with -f, to fork mainnet
       host: "127.0.0.1",
       port: 8545,
-      network_id: "999"
+      network_id: "999",
+      setTimeout: 90
     },    
     ropsten: {
       provider: new HDWalletProvider(secrets.mnemonic, "https://ropsten.infura.io/v3/"+secrets.infuraApiKey),

@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  text-align:left;
   margin: 2rem;
 }
 
@@ -8,3 +8,38 @@
   max-width: 720px;
   margin: 4rem auto auto;
 }
+
+.AppHeader {
+
+}
+
+.AppHeader .AppTitle img {
+  float: left;
+}
+
+.AppMain {
+  clear: both;
+}
+
+.AppTitle {
+  
+}
+
+.ComponentTitle {
+  font-weight: bold;
+  margin: 1em 0 1em 0;
+}
+
+.AccountInfo h4 {
+  font-weight: normal;
+  margin: unset;
+}
+
+.AccountInfo p {
+  margin: unset;
+}
+
+.CompoundInfo div {
+  margin: 1em 0 1em 0;
+}
+

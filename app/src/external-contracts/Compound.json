@@ -1,5 +1,5 @@
 {
-  "_comment": "This file hand-crafted by Alex from the ABIs and network addresses at https://compound.finance/docs#networks",
+  "_comment": "This file hand-crafted by Alex from the ABIs and network addresses at https://compound.finance/docs#networks ",
   "contractName": "CETH",
   "networks": {
     "999": {
