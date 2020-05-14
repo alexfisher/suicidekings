@@ -63,6 +63,8 @@ _truffle(develop)>_`migrate --reset`
 
 Seed with the same mnemonic as you used in ganache-cli, and change network to use localhost:8545 and Network ID 999.
 
+*Note*: Whenever you restart ganache-cli, you may find the proxy connection to the forked mainnet blocks is flakey and may need to restart ganache-cli/truffle over again to chill-out browser console issues. I also suspect reseting Metamask (Settings > Advanced) may go a long way in helping to fix these errors, too.
+
 ## Running on Testnets/Infura ##
 Create a `secrets.json` file in the project root (same level as truffle-config.js).  It should contain a mnemonic (you can generate via ganache/ganache-cli) and infura API Key (sign-up for free at infura.io)
 
