@@ -5,6 +5,7 @@ import ListKingsComponent from "./ListKingsComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
 import logo from "../logo.png";
 
+// Drizzle Context provides three types of React Components (below) -- Loading Component not available in this version yet :-(
 //const { AccountData, ContractData, ContractForm } = newContextComponents;
 const { ContractForm } = newContextComponents;
 

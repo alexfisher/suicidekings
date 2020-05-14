@@ -1,5 +1,9 @@
+.Loading {
+  text-align: center;
+}
+
 .App {
-  text-align:left;
+  text-align: left;
   margin: 2rem;
 }
 
