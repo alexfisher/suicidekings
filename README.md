@@ -23,9 +23,9 @@ To get the project running:
 
 `npm install`
 
-3. Terminal #1 - Run ganache-cli in deterministic mode on port 8545
+3. Terminal #1 - Run ganache-cli and copy-down the mnemonic it generates
 
-`ganache-cli -d`
+`ganache-cli`
 
 4. Terminal #2 - Start truffle,  compile/migrate the project to the blockchain
 
@@ -45,7 +45,7 @@ _truffle(develop)>_`migrate --reset`
 
 1. Start Ganache-cli (terminal 1):
 
-`ganache-cli -f https://mainnet.infura.io/v3/3b0206f022a6462cacf91dc79e2b9833 -m "myth like bonus scare over problem client lizard pioneer submit female collect" -i 999`
+`ganache-cli -f https://mainnet.infura.io/v3/3b0206f022a6462cacf91dc79e2b9833 -m "toss seven aerobic pledge lumber yard evil benefit title duty winter initial" -i 999`
 
 2. Connect on Truffle and deploy (terminal 2):
 
@@ -70,7 +70,7 @@ Create a `secrets.json` file in the project root (same level as truffle-config.j
 
 ```
 {
-  "mnemonic": "iron skate call erode fly crunch spirit minute cloth advice horse smooth",
+  "mnemonic": "toss seven aerobic pledge lumber yard evil benefit title duty winter initial",
   "infuraApiKey": "3b0206f022a6462cacf91dc79e2b9833"
 }
 ```
