@@ -1,7 +1,7 @@
 import React from "react";
 import { newContextComponents } from "@drizzle/react-components";
 import AccountInfoComponent from "./AccountInfoComponent";
-import ListKingsComponent from "./ListKingsComponent";
+//import ListKingsComponent from "./ListKingsComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
 import logo from "../logo.png";
 
@@ -23,10 +23,14 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
       <div className="AppMain">
         <div className="MintKing section">
         <div className="ComponentTitle">Mint King: </div>
-          <ContractForm drizzle={drizzle} contract="SuicideKings" method="mintKing" sendArgs={{gas: 800000}} />      
+          {/*
+          <ContractForm drizzle={drizzle} contract="SuicideKings" method="mintKing" sendArgs={{gas: 800000}} />
+          */}
         </div>
         <div className="ListKings section">
+          {/*
           <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
+          */}
         </div>
         <div className="CompoundInfo section">
           <CompoundInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
