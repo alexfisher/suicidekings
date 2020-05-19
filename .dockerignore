@@ -1,0 +1,13 @@
+app
+skdemo
+
+node_modules
+build
+
+Dockerfile
+.env
+
+.gitattributes
+.gitignore
+
+.DS_Store
