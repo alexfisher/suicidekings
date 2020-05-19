@@ -20,19 +20,19 @@ module.exports = {
 
   contracts_build_directory: path.join(__dirname, "app/src/contracts"),
   networks: {
-    develop: { // Connect with: truffle console --network develop
+    develop: { // Running locally, on-host
       host: "127.0.0.1",
       port: 8545,
-      network_id: "100"
+      network_id: "999"
     },
-    ganache: { // Useful for ganache-cli started with -f, to fork mainnet
-      host: "suicidekings_ganache_1",
+    local: { // Running in a Docker container
+      host: "0.0.0.0",
       port: 8545,
       network_id: "999",
       setTimeout: 90
     },
-    local: { // Useful for ganache-cli started with -f, to fork mainnet
-      host: "0.0.0.0",
+    docker: { // Running in a Docker container, as part of a `docker-compose` service
+      host: "suicidekings_ganache_1",
       port: 8545,
       network_id: "999",
       setTimeout: 90
