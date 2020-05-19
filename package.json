@@ -1,5 +1,5 @@
 {
-  "name": "drizzle-box",
+  "name": "suicidekings",
   "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/truffle-box/drizzle-box.git"
+    "url": "git+https://github.com/alexfisher/suicidekings.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/truffle-box/drizzle-box/issues"
+    "url": "https://github.com/alexfisher/suicidekings/issues"
   },
-  "homepage": "https://github.com/truffle-box/drizzle-box#readme",
+  "homepage": "https://github.com/alexfisher/suicidekings#suicide-kings",
   "dependencies": {
     "@openzeppelin/contracts": "^2.4.0",
     "@truffle/hdwallet-provider": "^1.0.35",
