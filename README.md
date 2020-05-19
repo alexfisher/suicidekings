@@ -10,10 +10,10 @@ Prerequisites/Versions I've used:
 
 * Ubuntu 18.04, Windows 10
 * VSCode 1.44.2 (w/ extensions: solidity 0.0.72, Solidity Contract Flattener 0.0.7, Solidity Visual Auditor 0.0.24)
-* Node v10.20.1
-* npm 6.14.5  
+* Node v11.15.0
+* npm 6.7.0  
 * truffle v5.1.24 (`npm install -g truffle`)
-* ganache-cli v6.9.1 (`npm install -g ganache-cli`)
+* ganache-cli v6.8.2 (`npm install -g ganache-cli`)
 
 To get the project running:
 
