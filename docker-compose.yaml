@@ -9,6 +9,7 @@ services:
       - network
     volumes:
       - ./contracts:/truffle/contracts
+      - ./app/src/contracts:/truffle/app/src/contracts
   ganache:
     image: trufflesuite/ganache-cli
     restart: unless-stopped
