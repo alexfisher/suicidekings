@@ -2,7 +2,9 @@
 
 This repo uses `docker-compose` to run an isolated `truffle` console session against a local `ganache` instance.
 
-To begin: run `$ docker-compose run --rm truffle`.
+To begin, run:
+  1. `$ docker-compose build --force-rm --compress truffle`
+  2. `$ docker-compose run --rm truffle`
 
 ## Details of `docker-compose`
 
