@@ -1,4 +1,5 @@
 const SuicideKing = artifacts.require("SuicideKing");
+const SuicideKingCardFactory = artifacts.require("SuicideKingCardFactory");
 
 module.exports = function(deployer, network) {
   // OpenSea proxy registry addresses for rinkeby and mainnet.
@@ -10,4 +11,5 @@ module.exports = function(deployer, network) {
   }
 
   deployer.deploy(SuicideKing, proxyRegistryAddress,  {gas: 5000000});
+  deployer.deploy(SuicideKingCardFactory);
 };

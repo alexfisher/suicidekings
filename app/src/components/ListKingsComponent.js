@@ -1,18 +1,18 @@
 import React from "react";
 import { newContextComponents } from "@drizzle/react-components";
 
-const { ContractData } = newContextComponents;
+const { ContractForm } = newContextComponents;
 
 const ListKingsComponent = ({ drizzle, drizzleState }) => {
   return (
     <div className="ListKingsComponent">
       <div className="ComponentTitle">Your King(s): </div>
 
-      <ContractData
+      <ContractForm
         drizzle={drizzle}
         drizzleState={drizzleState}
-        contract="SuicideKings"
-        method="myKings"
+        contract="SuicideKingCardFactory"
+        method="pickRandomCardType"
       />
 
     </div>
