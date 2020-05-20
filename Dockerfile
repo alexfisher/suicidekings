@@ -12,4 +12,4 @@ COPY ./secrets.json .
 COPY ./test ./test
 COPY ./truffle-config.js .
 
-ENTRYPOINT yarn run truffle console --network ganache
+ENTRYPOINT yarn run truffle console --network docker

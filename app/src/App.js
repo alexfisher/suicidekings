@@ -16,6 +16,9 @@ const App = () => {
         {drizzleContext => {
           const { drizzle, drizzleState, initialized } = drizzleContext;
 
+          window.drizzle = drizzle;
+          window.drizzleState = drizzleState;
+
           if (!initialized) {
             return (
               <div className="Loading">
