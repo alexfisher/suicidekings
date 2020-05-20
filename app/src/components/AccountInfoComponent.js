@@ -4,7 +4,12 @@ import { newContextComponents } from "@drizzle/react-components";
 const { AccountData, ContractData } = newContextComponents;
 
 class AccountInfoComponent extends React.Component {
-  state = { dataKey: null };
+  constructor(props) {
+    super(props);
+    this.state = { dataKey: null, id: 1 };
+
+    this.handleIdChange = this.handleIdChange.bind(this);
+  }
 
   componentDidMount() {
     // Destructure properties of the component 
@@ -18,6 +23,11 @@ class AccountInfoComponent extends React.Component {
     // Or, just install React Developer Tools to your browser and view Components > props
     //console.log(drizzle);
     //console.log(drizzleState);
+  }
+
+  handleIdChange(event) {
+    this.setState({id: event.target.value});
+    console.log(event.target.value);
   }
 
   render() {
@@ -37,49 +47,28 @@ class AccountInfoComponent extends React.Component {
           />
         </div>      
         <div className="KingBalance">
+          Select type id:&nbsp; 
+          <span>
+            <select value={this.state.id} onChange={this.handleIdChange}>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </span>&nbsp; 
+
           Total Supply:&nbsp;   
           <ContractData
             drizzle={this.props.drizzle}
             drizzleState={this.props.drizzleState}
             contract="SuicideKing"
             method="totalSupply"
-            methodArgs={[2]}
+            methodArgs={[this.state.id]}
           />&nbsp;{symbol && symbol.value}S
-          
         </div>
       </div>
     )
   }
 
 } 
-
-/*
-({ drizzle, drizzleState }) => {
-  return (
-    <div className="AccountInfo">
-      <div className="AccountBalance">
-        <AccountData
-          drizzle={drizzle}
-          drizzleState={drizzleState}
-          accountIndex={0}
-          units="ether"
-          precision={3}
-        />
-      </div>      
-      <div className="KingBalance">
-        Total Supply:&nbsp;   
-        <ContractData
-          drizzle={drizzle}
-          drizzleState={drizzleState}
-          contract="SuicideKing"
-          method="totalSupply"
-          methodArgs={[2]}
-        />
-        &nbsp;KINGS 
-      </div>
-    </div>
-  );
-};
-*/
 
 export default AccountInfoComponent;
