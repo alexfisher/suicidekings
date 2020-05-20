@@ -7,9 +7,13 @@
     "@drizzle/react-plugin": "^1.5.1",
     "@drizzle/store": "^1.5.1",
     "@truffle/hdwallet-provider": "^1.0.35",
+    "fibers": "^5.0.0",
+    "node-sass": "^4.14.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
-    "react-scripts": "^3.4.1"
+    "react-scripts": "^3.4.1",
+    "sass": "^1.26.5",
+    "typescript": "^3.9.3"
   },
   "scripts": {
     "start": "react-scripts start",
