@@ -23,9 +23,10 @@ import siteOptions from '../utils/site-options';
 import Wallet from '../wallets';
 import { Helpers } from '../../utils/helpers';
 import { GLOBALS } from '../../utils/globals';
-import { HeaderBar } from '../components/HeaderBar';
 import { Sidemenu } from '../components/Sidemenu';
 */
+
+import { HeaderBar } from '../components/HeaderBar';
 
 // REFERENCE
 // https://github.com/robsecord/ChargedParticlesWeb/blob/master/src/app/layout/AppLayout.js
@@ -125,29 +126,30 @@ function AppLayout({ children }) {
     }, [networkId, rootDispatch]);
 
 
-    const _handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
-    };
-
-    const _handleCloseDrawer = () => {
-        setMobileOpen(false);
-    };
 		*/
 
+    const _handleDrawerToggle = () => {
+      alert('Alex Rules');
+    };
+
+
+    const _handleCloseDrawer = () => {
+      alert('Alex Rules');
+    };
 
     return (
         <ThemeProvider theme={{...rimbleTheme, ...theme}}>
             <div className={classes.root}>
+                <HeaderBar
+                    title={"SuicideKings"}
+                    drawerToggle={_handleDrawerToggle}
+                />
 								<main className={classes.content}>
                     <div className={classes.toolbar} />
                     {children}
                 </main>
 								{/*
                 <CssBaseline />
-                <HeaderBar
-                    title={siteTitle}
-                    drawerToggle={_handleDrawerToggle}
-                />
                 <Hidden mdUp implementation="css">
                     <nav className={classes.drawer} aria-label="mailbox folders">
                         <Drawer
