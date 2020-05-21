@@ -13,7 +13,7 @@ const drizzle = new Drizzle(drizzleOptions);
 
 const App = () => {
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="lg">
       <DrizzleContext.Provider drizzle={drizzle}>
         <DrizzleContext.Consumer>
           {drizzleContext => {

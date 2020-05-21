@@ -5,7 +5,9 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
 import theme from './theme';
 import * as serviceWorker from './serviceWorker';
-//import './index.css';
+// Note: Index.css shouldn't be used for styling unless there's an exception
+// See theme.js and https://material-ui.com/customization/theming/
+import './index.css';
 
 ReactDOM.render(
     <ThemeProvider theme={theme}>

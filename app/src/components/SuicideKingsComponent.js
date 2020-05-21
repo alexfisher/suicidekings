@@ -28,13 +28,14 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
           }}
         </NetworkIndicator>        
       </Grid>
+
       <Grid item xs={12}>
         <AccountInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <CompoundInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
     </Grid>
