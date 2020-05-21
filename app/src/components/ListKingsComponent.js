@@ -5,15 +5,21 @@ import { Card } from "rimble-ui";
 
 const { ContractData } = newContextComponents;
 
+/*
+function genRandom() {
+  const randomNum = drizzle.contracts.SuicideKingCardFactory.methods.pickRandomCardType.cacheSend({from: drizzleState.accounts[0]});
+}
+*/
+
 const ListKingsComponent = ({ drizzle, drizzleState }) => {
   return (
     <Box>
       <Box>
         <Typography variant="h5" component="h2" gutterBottom>
-          Factory
+          Kings
         </Typography>      
       </Box>
-      <Card>
+      <Card>  
         <Box>
           Number of Card Types:{' '} 
           <ContractData
@@ -24,7 +30,10 @@ const ListKingsComponent = ({ drizzle, drizzleState }) => {
           />
         </Box>
         <Box>
-          <Button variant="contained" color="primary">Generate new Type</Button>
+          <Button variant="contained" color="primary">Generate Random Number</Button>
+          <Box>
+            Random number: 
+          </Box>
         </Box>
       </Card>
     </Box>

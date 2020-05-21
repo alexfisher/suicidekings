@@ -1,6 +1,6 @@
 import React from "react";
 import { newContextComponents } from "@drizzle/react-components";
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import { Card } from "rimble-ui";
 
 //const { AccountData, ContractData, ContractForm } = newContextComponents;

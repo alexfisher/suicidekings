@@ -3,7 +3,7 @@ import { Box, Select, Typography } from '@material-ui/core';
 import { newContextComponents } from "@drizzle/react-components";
 import { Card, EthAddress } from "rimble-ui";
 
-const { AccountData, ContractData } = newContextComponents;
+const { ContractData } = newContextComponents;
 
 class AccountInfoComponent extends React.Component {
   constructor(props) {
@@ -50,11 +50,13 @@ class AccountInfoComponent extends React.Component {
           Balance: {drizzleState.accountBalances[drizzleState.accounts[0]]} Wei
         </Box>
         <Box>
-          Select type id:&nbsp; 
+          ERC1155 type (_id):&nbsp; 
           <Select value={this.state.id} onChange={this.handleIdChange}>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
           </Select>&nbsp;Total Supply:&nbsp;
           <ContractData
           drizzle={drizzle}
@@ -63,7 +65,7 @@ class AccountInfoComponent extends React.Component {
           method="totalSupply"
           methodArgs={[this.state.id]}
           />&nbsp;{symbol && symbol.value}S
-        </Box>
+        </Box>      
 
       </Card>
     </Box>

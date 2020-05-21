@@ -6,9 +6,11 @@ import ListKingsComponent from "./ListKingsComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
 import logo from "../logo.png";
 
-// Drizzle Context provides three types of React Components (below) -- Loading Component not available in this version yet :-(
-//const { AccountData, ContractData, ContractForm } = newContextComponents;
-//const { ContractForm } = newContextComponents;
+// Drizzle Context provides three types of React Components, e.g. destructure example:
+// const { AccountData, ContractData, ContractForm } = newContextComponents;
+
+// Material-ui Grid info: https://material-ui.com/api/grid/
+// NetworkIndicator info: https://rimble.consensys.design/components/web3-components/NetworkIndicator
 
 const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
   return (
