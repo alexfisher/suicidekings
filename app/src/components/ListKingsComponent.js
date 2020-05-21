@@ -1,26 +1,30 @@
 import React from "react";
 import { newContextComponents } from "@drizzle/react-components";
-import Button from '@material-ui/core/Button';
+import { Box, Button, Typography } from '@material-ui/core';
 
-const { ContractForm } = newContextComponents;
+const { ContractData } = newContextComponents;
 
 const ListKingsComponent = ({ drizzle, drizzleState }) => {
   return (
-    <div className="ListKingsComponent">
-      <div className="ComponentTitle">Your King(s): </div>
-
-      <Button variant="contained" color="primary">
-        Hellow World
-      </Button>
-
-      <ContractForm
-        drizzle={drizzle}
-        drizzleState={drizzleState}
-        contract="SuicideKingCardFactory"
-        method="pickRandomCardType"
-      />
-
-    </div>
+    <Box>
+      <Box>
+        <Typography variant="h5" component="h2" gutterBottom>
+          SuicideKingCardFactory
+        </Typography>      
+      </Box>
+      <Box>
+        Number of Card Types:{' '} 
+        <ContractData
+          drizzle={drizzle}
+          drizzleState={drizzleState}
+          contract="SuicideKingCardFactory"
+          method="numCardTypes"
+        />
+      </Box>
+      <Box>
+        Number of Card Types:{' '} 
+      </Box>
+    </Box>
   );
 };
 

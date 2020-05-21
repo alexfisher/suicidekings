@@ -4,12 +4,11 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
 import theme from './theme';
-import './index.css';
 import * as serviceWorker from './serviceWorker';
+//import './index.css';
 
-//ReactDOM.render(<App />, document.getElementById('root'));
 ReactDOM.render(
-  <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
     {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
     <CssBaseline />
     <App />
