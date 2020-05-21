@@ -1,6 +1,7 @@
 import React from "react";
-import { Select } from '@material-ui/core';
+import { Box, Select, Typography } from '@material-ui/core';
 import { newContextComponents } from "@drizzle/react-components";
+import { Card, EthAddress } from "rimble-ui";
 
 const { AccountData, ContractData } = newContextComponents;
 
@@ -32,38 +33,40 @@ class AccountInfoComponent extends React.Component {
   }
 
   render() {
-    const { drizzleState } = this.props;
+    const { drizzle, drizzleState } = this.props;
     const { SuicideKing } = drizzleState.contracts;
     const symbol = SuicideKing.symbol[this.state.dataKey];
 
     return (
-    <div>
-      <div>
-        <AccountData
-          drizzle={this.props.drizzle}
-          drizzleState={this.props.drizzleState}
-          accountIndex={0}
-          units="ether"
-          precision={3}
-        />
-      </div>
+    <Box>
+      <Box>
+        <Typography variant="h5" component="h2" gutterBottom>
+          Account Info
+        </Typography>      
+      </Box>      
+      <Card>
+        <EthAddress address={drizzleState.accounts[0]} textLabels />
+        <Box>
+          Balance: {drizzleState.accountBalances[drizzleState.accounts[0]]} Wei
+        </Box>
+        <Box>
+          Select type id:&nbsp; 
+          <Select value={this.state.id} onChange={this.handleIdChange}>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </Select>&nbsp;Total Supply:&nbsp;
+          <ContractData
+          drizzle={drizzle}
+          drizzleState={drizzleState}
+          contract="SuicideKing"
+          method="totalSupply"
+          methodArgs={[this.state.id]}
+          />&nbsp;{symbol && symbol.value}S
+        </Box>
 
-      <div>
-        Select type id:&nbsp; 
-        <Select value={this.state.id} onChange={this.handleIdChange}>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </Select>&nbsp;Total Supply:&nbsp;
-        <ContractData
-        drizzle={this.props.drizzle}
-        drizzleState={this.props.drizzleState}
-        contract="SuicideKing"
-        method="totalSupply"
-        methodArgs={[this.state.id]}
-        />&nbsp;{symbol && symbol.value}S
-      </div>
-    </div>
+      </Card>
+    </Box>
     )
   }
 

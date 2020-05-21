@@ -1,6 +1,7 @@
 import React from "react";
 import { newContextComponents } from "@drizzle/react-components";
 import { Box, Button, Typography } from '@material-ui/core';
+import { Card } from "rimble-ui";
 
 const { ContractData } = newContextComponents;
 
@@ -9,21 +10,23 @@ const ListKingsComponent = ({ drizzle, drizzleState }) => {
     <Box>
       <Box>
         <Typography variant="h5" component="h2" gutterBottom>
-          SuicideKingCardFactory
+          Factory
         </Typography>      
       </Box>
-      <Box>
-        Number of Card Types:{' '} 
-        <ContractData
-          drizzle={drizzle}
-          drizzleState={drizzleState}
-          contract="SuicideKingCardFactory"
-          method="numCardTypes"
-        />
-      </Box>
-      <Box>
-        Number of Card Types:{' '} 
-      </Box>
+      <Card>
+        <Box>
+          Number of Card Types:{' '} 
+          <ContractData
+            drizzle={drizzle}
+            drizzleState={drizzleState}
+            contract="SuicideKingCardFactory"
+            method="numCardTypes"
+          />
+        </Box>
+        <Box>
+          <Button variant="contained" color="primary">Generate new Type</Button>
+        </Box>
+      </Card>
     </Box>
   );
 };

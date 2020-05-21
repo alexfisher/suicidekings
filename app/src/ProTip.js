@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ProTip() {
   const classes = useStyles();
   return (
-    <Typography className={classes.root} color="textSecondary">
+    <Typography className={classes.root} color="textSecondary" align="center">
       <LightBulbIcon className={classes.lightBulb} />
       Did you know? ETH is money. Learn more at{' '}
       <Link href="https://ethereum.org/">ethereum.org</Link>

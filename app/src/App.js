@@ -9,19 +9,6 @@ import SuicideKingsComponent from "./components/SuicideKingsComponent";
 import logo from "./logo.png";
 //import "./App.css";
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        The Crypto Bros
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
 const drizzle = new Drizzle(drizzleOptions);
 
 const App = () => {
@@ -53,6 +40,19 @@ const App = () => {
       <ProTip />
       <Copyright />
     </Container>
+  );
+}
+
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {'Copyright © '}
+      <Link color="inherit" href="https://material-ui.com/">
+        The Crypto Bros
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
   );
 }
 

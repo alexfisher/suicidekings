@@ -1,13 +1,21 @@
 import React from "react";
 import { newContextComponents } from "@drizzle/react-components";
+import { Box, Button, Typography } from '@material-ui/core';
+import { Card } from "rimble-ui";
 
 //const { AccountData, ContractData, ContractForm } = newContextComponents;
 const { ContractData, ContractForm } = newContextComponents;
 
 const CompoundInfoComponent = ({ drizzle, drizzleState }) => {
   return (
-    <div className="CompoundInfoComponent">
-      <div className="ComponentTitle">Compound Info:</div>
+    <Box>
+      <Box>
+        <Typography variant="h5" component="h2" gutterBottom>
+          Compound
+        </Typography>      
+      </Box>      
+      <Card>
+        <Box>
           <p>
             <span>Compound Contract Name: </span>
             <ContractData
@@ -65,7 +73,9 @@ const CompoundInfoComponent = ({ drizzle, drizzleState }) => {
               labels={["Amount of cETH"]}
             />
           </div>
-    </div>
+        </Box>
+      </Card>
+    </Box>
   );
 };
 

@@ -4,7 +4,7 @@ import 'typeface-roboto';
 // A custom theme for this app
 const theme = createMuiTheme({
   palette: {
-    type:'dark'
+    type:'light'
   },
 });
 

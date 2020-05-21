@@ -1,6 +1,6 @@
 import React from "react";
-import { Box, Grid, Typography } from '@material-ui/core';
-//import { newContextComponents } from "@drizzle/react-components";
+import { Grid, Typography } from '@material-ui/core';
+import NetworkIndicator from '@rimble/network-indicator';
 import AccountInfoComponent from "./AccountInfoComponent";
 import ListKingsComponent from "./ListKingsComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
@@ -17,15 +17,22 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
         <img src={logo} alt="suicidekings-logo" width="116px"/>
       </Grid>
       <Grid item xs={9}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1">
           Suicide Kings
         </Typography>
+        <NetworkIndicator currentNetwork={drizzleState.web3.networkId} requiredNetwork={4}>
+          {{
+            onNetworkMessage: "Connected to correct network",
+            noNetworkMessage: "Not connected to anything",
+            onWrongNetworkMessage: "Wrong network"
+          }}
+        </NetworkIndicator>        
+      </Grid>
+      <Grid item xs={12}>
         <AccountInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
       <Grid item xs={12}>
-        <Box>
-          <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
-        </Box>
+        <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
       <Grid item xs={12}>
         <CompoundInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
