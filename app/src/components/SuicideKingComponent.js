@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, Typography } from '@material-ui/core';
 import NetworkIndicator from '@rimble/network-indicator';
 import AccountInfoComponent from "./AccountInfoComponent";
-import KingsComponent from "./KingsComponent";
+import KingComponent from "./KingComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
 import logo from "../logo.png";
 
@@ -12,11 +12,11 @@ import logo from "../logo.png";
 // Material-ui Grid info: https://material-ui.com/api/grid/
 // NetworkIndicator info: https://rimble.consensys.design/components/web3-components/NetworkIndicator
 
-export default class SuicideKingsComponent extends React.Component {
+export default class SuicideKingComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};  // For local state in this component
-  }  
+  }
 
   componentDidMount() {
     // Destructure props to get Drizzle and DrizzleState if needed
@@ -25,7 +25,7 @@ export default class SuicideKingsComponent extends React.Component {
     // We can print our drizzle objects to the console if needed!
     // Or, just install React Developer Tools to your browser and view Components > props
     //console.log(drizzle);
-    //console.log(drizzleState);    
+    //console.log(drizzleState);
   }
 
   render() {
@@ -46,19 +46,19 @@ export default class SuicideKingsComponent extends React.Component {
             noNetworkMessage: "Not connected to anything",
             onWrongNetworkMessage: "Wrong network"
           }}
-        </NetworkIndicator>        
+        </NetworkIndicator>
       </Grid>
 
       <Grid item xs={12}>
         <AccountInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
       <Grid item xs={6}>
-        <KingsComponent drizzle={drizzle} drizzleState={drizzleState} />
+        <KingComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
       <Grid item xs={6}>
         <CompoundInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
-    </Grid>      
+    </Grid>
     )
   }
 }
