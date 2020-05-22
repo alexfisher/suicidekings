@@ -1,16 +1,17 @@
 import React from "react";
 import { Box, Select, Typography } from '@material-ui/core';
 import { newContextComponents } from "@drizzle/react-components";
-import { Card, EthAddress } from "rimble-ui";
+import { Button, Card, EthAddress } from "rimble-ui";
 
 const { ContractData } = newContextComponents;
 
 class AccountInfoComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { dataKey: null, id: 1 };
+    this.state = { id: 1, tokenSymbol: null };
 
     this.handleIdChange = this.handleIdChange.bind(this);
+    this.handleMintKing = this.handleMintKing.bind(this);
   }
 
   componentDidMount() {
@@ -18,8 +19,8 @@ class AccountInfoComponent extends React.Component {
     // (at least drizzle and drizzleState will be passed in JSX call, but you can add more)
     const { drizzle } = this.props;
     const SuicideKing = drizzle.contracts.SuicideKing;
-    const dataKey = SuicideKing.methods["symbol"].cacheCall();
-    this.setState({dataKey});
+    const tokenSymbol = SuicideKing.methods["symbol"].cacheCall();
+    this.setState({tokenSymbol});
     
     // We can print our drizzle objects to the console if needed!
     // Or, just install React Developer Tools to your browser and view Components > props
@@ -32,10 +33,26 @@ class AccountInfoComponent extends React.Component {
     console.log(event.target.value);
   }
 
+  handleMintKing(event) {
+    const { drizzle, drizzleState } = this.props;
+    console.log(drizzle);
+    console.log(drizzleState);    
+
+    if(drizzleState.drizzleStatus.initialized) {
+      const stackId = drizzle.contracts.SuicideKing.methods["create"].cacheSend(drizzleState.accounts[0], 1, "http://TODO_API_URL_HERE", []);
+
+      if(drizzleState.transactionStack[stackId]) {
+        const txHash = drizzleState.transactionStack[stackId];
+        console.log('New King id minted, txHash: ' + txHash);
+      }
+    }
+    
+  }
+
   render() {
     const { drizzle, drizzleState } = this.props;
     const { SuicideKing } = drizzleState.contracts;
-    const symbol = SuicideKing.symbol[this.state.dataKey];
+    const tokenSymbol = SuicideKing.symbol[this.state.tokenSymbol];
 
     return (
     <Box>
@@ -64,8 +81,13 @@ class AccountInfoComponent extends React.Component {
           contract="SuicideKing"
           method="totalSupply"
           methodArgs={[this.state.id]}
-          />&nbsp;{symbol && symbol.value}S
-        </Box>      
+          />&nbsp;{tokenSymbol && tokenSymbol.value}S
+        </Box>
+        <Box>
+          <Button size="small" type="submit" onClick={this.handleMintKing}>
+            Mint KING
+          </Button>
+        </Box> 
 
       </Card>
     </Box>
