@@ -5,7 +5,7 @@ import ProTip from './ProTip';
 import { DrizzleContext } from "@drizzle/react-plugin";
 import { Drizzle } from "@drizzle/store";
 import drizzleOptions from "./drizzleOptions";
-import SuicideKingsComponent from "./components/SuicideKingsComponent";
+import SuicideKingComponent from "./components/SuicideKingComponent";
 import logo from "./logo.png";
 //import "./App.css";
 
@@ -32,7 +32,7 @@ const App = () => {
             }
 
             return (
-              <SuicideKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
+              <SuicideKingComponent drizzle={drizzle} drizzleState={drizzleState} />
             )
           }}
         </DrizzleContext.Consumer>

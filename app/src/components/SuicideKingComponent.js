@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, Typography } from '@material-ui/core';
 import NetworkIndicator from '@rimble/network-indicator';
 import AccountInfoComponent from "./AccountInfoComponent";
-import ListKingsComponent from "./ListKingsComponent";
+import KingComponent from "./KingComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
 import logo from "../logo.png";
 
@@ -12,9 +12,27 @@ import logo from "../logo.png";
 // Material-ui Grid info: https://material-ui.com/api/grid/
 // NetworkIndicator info: https://rimble.consensys.design/components/web3-components/NetworkIndicator
 
-const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
-  return (
-    <Grid container spacing={3}>
+export default class SuicideKingComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};  // For local state in this component
+  }
+
+  componentDidMount() {
+    // Destructure props to get Drizzle and DrizzleState if needed
+    // const { drizzle, drizzleState } = this.props;
+
+    // We can print our drizzle objects to the console if needed!
+    // Or, just install React Developer Tools to your browser and view Components > props
+    //console.log(drizzle);
+    //console.log(drizzleState);
+  }
+
+  render() {
+    const { drizzle, drizzleState } = this.props;
+
+    return (
+      <Grid container spacing={3}>
       <Grid item xs={3}>
         <img src={logo} alt="suicidekings-logo" width="116px"/>
       </Grid>
@@ -28,20 +46,19 @@ const SuicideKingsComponent = ({ drizzle, drizzleState }) => {
             noNetworkMessage: "Not connected to anything",
             onWrongNetworkMessage: "Wrong network"
           }}
-        </NetworkIndicator>        
+        </NetworkIndicator>
       </Grid>
 
       <Grid item xs={12}>
         <AccountInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
       <Grid item xs={6}>
-        <ListKingsComponent drizzle={drizzle} drizzleState={drizzleState} />
+        <KingComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
       <Grid item xs={6}>
         <CompoundInfoComponent drizzle={drizzle} drizzleState={drizzleState} />
       </Grid>
     </Grid>
-  );
-};
-
-export default SuicideKingsComponent;
+    )
+  }
+}
