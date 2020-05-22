@@ -3,18 +3,30 @@ import { newContextComponents } from "@drizzle/react-components";
 import { Box, Typography } from '@material-ui/core';
 import { Card } from "rimble-ui";
 
-//const { AccountData, ContractData, ContractForm } = newContextComponents;
 const { ContractData, ContractForm } = newContextComponents;
 
-const CompoundInfoComponent = ({ drizzle, drizzleState }) => {
-  return (
-    <Box>
+export default class CompoundInfoComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};  // For local state in this component
+  }
+
+  componentDidMount() {
+    // Destructure props to get Drizzle and DrizzleState if needed
+    // const { drizzle, drizzleState } = this.props;
+  }
+
+  render() {
+    const { drizzle, drizzleState } = this.props;
+
+    return (
       <Box>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Compound
-        </Typography>      
-      </Box>      
-      <Card>
+        <Box>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Compound
+          </Typography>      
+        </Box>      
+        <Card>
         <Box>
           <p>
             <span>Compound Contract Name: </span>
@@ -75,8 +87,7 @@ const CompoundInfoComponent = ({ drizzle, drizzleState }) => {
           </div>
         </Box>
       </Card>
-    </Box>
-  );
-};
-
-export default CompoundInfoComponent;
+      </Box>      
+    )
+  }
+}
