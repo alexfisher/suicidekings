@@ -24,10 +24,65 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
   uint256 private _currentTokenID = 0;
   mapping (uint256 => address) public creators;
   mapping (uint256 => uint256) public tokenSupply;
+  mapping (uint256 => uint256) public supplyForBaseKingType;
+
   // Contract name
   string public name;
   // Contract symbol
   string public symbol;
+
+  /**
+   * Card types. Combination of:
+   *  - suit (pip) + color
+   */
+  enum CardType {
+    Suit1Color1, Suit1Color2, Suit1Color3, Suit1Color4,
+    Suit2Color1, Suit2Color2, Suit2Color3, Suit2Color4,
+    Suit3Color1, Suit3Color2, Suit3Color3, Suit3Color4,
+    Suit4Color1, Suit4Color2, Suit4Color3, Suit4Color4
+  }
+
+  uint256 constant NUM_CARDTYPE = 16;
+  uint256 seed;
+
+  /**
+    * @dev Improve pseudorandom number generator by letting the owner set the seed manually,
+  * making attacks more difficult
+  * @param _newSeed The new seed to use for the next transaction
+    */
+  function setSeed(uint256 _newSeed) public onlyOwner {
+    seed = _newSeed;
+  }
+
+  function numCardTypes() external pure returns (uint256) {
+    return NUM_CARDTYPE;
+  }
+
+  /**
+   * @dev Pseudo-random number generator
+   * NOTE: to improve randomness, generate it with an oracle
+   */
+  function _random() internal returns (uint256) {
+    uint256 randomNumber = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, seed)));
+    seed = randomNumber;
+    return randomNumber;
+  }
+
+  /**
+    If using `ganache`, be sure to specify "blockTime". From the docs:
+    Using the --blockTime flag is discouraged unless you have tests which require a specific mining interval.
+    
+    We do, because `_random()` relies on the block number.
+   */
+  function _pickRandomCardType() internal returns (CardType) {
+    uint16 value = uint16(_random().mod(NUM_CARDTYPE));
+    return CardType(value);
+  }
+
+  function _getRandomBaseID() internal returns (uint256) {
+    uint256 baseTypeID = uint256(_pickRandomCardType()) << 248;
+    return baseTypeID;
+  }
 
   /**
    * @dev Require msg.sender to be the creator of the token id
@@ -101,7 +156,6 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
     string calldata _uri,
     bytes calldata _data
   ) external onlyOwner returns (uint256) {
-
     uint256 _id = _getNextTokenID();
     _incrementTokenTypeId();
     creators[_id] = msg.sender;
@@ -115,8 +169,24 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
     return _id;
   }
 
+  function crown(
+  ) public onlyOwner returns (uint256) {
+    uint256 _nextBaseKing = _getRandomBaseID();
+    return _nextBaseKing;
+    /*
+    if (supplyForBaseKingType[_nextBaseKing] == 0) {
+      supplyForBaseKingType[_nextBaseKing] = _nextBaseKing;
+    }
+
+    uint256 _newKingID = supplyForBaseKingType[_nextBaseKing]++;
+    supplyForBaseKingType[_nextBaseKing] = _newKingID;
+    return _nextBaseKing + _newKingID;
+    */
+  }
+
+
   /**
-    * @dev Mints some amount of tokens to an address
+    * @dev Mints some amount of tokens to an addres
     * @param _to          Address of the future owner of the token
     * @param _id          Token ID to mint
     * @param _quantity    Amount of tokens to mint
