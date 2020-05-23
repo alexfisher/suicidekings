@@ -39,11 +39,13 @@ export default class KingsComponent extends React.Component {
     console.log(drizzleState);    
 
     if(drizzleState.drizzleStatus.initialized) {
-      const stackId = drizzle.contracts.SuicideKing.methods["create"].cacheSend(drizzleState.accounts[0], 1, "http://TODO_API_URL_HERE", []);
+      //const stackId = drizzle.contracts.SuicideKing.methods["create"].cacheSend(drizzleState.accounts[0], 1, "http://TODO_API_URL_HERE", []);
+      const stackId = drizzle.contracts.SuicideKing.methods["crownNewKing"].cacheSend();
 
       if(drizzleState.transactionStack[stackId]) {
         const txHash = drizzleState.transactionStack[stackId];
-        console.log('New King id minted, txHash: ' + txHash);
+        //console.log(txHash);
+        console.log("King minted");
       }
     }
     
@@ -62,15 +64,7 @@ export default class KingsComponent extends React.Component {
           </Typography>      
         </Box>
         <Card>  
-          <Box>
-            Number of Card Types:{' '} 
-            <ContractData
-              drizzle={drizzle}
-              drizzleState={drizzleState}
-              contract="SuicideKingCardFactory"
-              method="numCardTypes"
-            />
-          </Box>
+          {/*
           <Box>
             ERC1155 type (_id):&nbsp; 
             <Select value={this.state.id} onChange={this.handleIdChange}>
@@ -88,14 +82,12 @@ export default class KingsComponent extends React.Component {
             methodArgs={[this.state.id]}
             />&nbsp;{tokenSymbol && tokenSymbol.value}S
           </Box>
+          */}
           <Box>
             <Button size="small" type="submit" onClick={this.handleMintKing}>
               Mint KING
             </Button>
           </Box> 
-          <Box>
-            <Button size="small">Get Random Number</Button>
-          </Box>
         </Card>
       </Box>
     )

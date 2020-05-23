@@ -24,7 +24,7 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
   uint256 private _currentTokenID = 0;
   mapping (uint256 => address) public creators;
   mapping (uint256 => uint256) public tokenSupply;
-  mapping (uint256 => uint256) public supplyForBaseKingType;
+  mapping (uint256 => uint256) public kingBaseCounter;
 
   // Contract name
   string public name;
@@ -79,7 +79,7 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
     return CardType(value);
   }
 
-  function _getRandomBaseID() internal returns (uint256) {
+  function _getRandomKingBase() internal returns (uint256) {
     uint256 baseTypeID = uint256(_pickRandomCardType()) << 248;
     return baseTypeID;
   }
@@ -169,21 +169,20 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
     return _id;
   }
 
-  function crown(
-  ) public onlyOwner returns (uint256) {
-    uint256 _nextBaseKing = _getRandomBaseID();
-    return _nextBaseKing;
-    /*
-    if (supplyForBaseKingType[_nextBaseKing] == 0) {
-      supplyForBaseKingType[_nextBaseKing] = _nextBaseKing;
-    }
+  function crownNewKing() external onlyOwner returns (uint256) {
 
-    uint256 _newKingID = supplyForBaseKingType[_nextBaseKing]++;
-    supplyForBaseKingType[_nextBaseKing] = _newKingID;
-    return _nextBaseKing + _newKingID;
-    */
+    // Get King Base
+    uint256 kingBase = _getRandomKingBase();
+
+    // get Next King NFT ID
+    kingBaseCounter[kingBase]++;
+    uint256 kingNFT = kingBaseCounter[kingBase];
+
+    // Return new unique ID
+    uint256 kingId = kingBase + kingNFT;
+
+    return kingId;
   }
-
 
   /**
     * @dev Mints some amount of tokens to an addres
