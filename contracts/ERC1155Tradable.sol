@@ -1,6 +1,7 @@
 pragma solidity ^0.5.16;
 
 import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import 'multi-token-standard/contracts/tokens/ERC1155/ERC1155.sol';
 import 'multi-token-standard/contracts/tokens/ERC1155/ERC1155Metadata.sol';
 import 'multi-token-standard/contracts/tokens/ERC1155/ERC1155MintBurn.sol';
@@ -14,76 +15,51 @@ contract ProxyRegistry {
 
 /**
  * @title ERC1155Tradable
- * ERC1155Tradable - ERC1155 contract that whitelists an operator address, has create and mint functionality, and supports useful standards from OpenZeppelin,
-  like _exists(), name(), symbol(), and totalSupply()
  */
-contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
+contract ERC1155Tradable is ERC1155, ReentrancyGuard, ERC1155Metadata, Ownable {
   using Strings for string;
+  /***********************************|
+  |     Variables/Events/Modifiers    |
+  |__________________________________*/
 
   address proxyRegistryAddress;
+  
+  /* ---------------------------------------- */
+  /* DELETE THESE */
+  /* ---------------------------------------- */
   uint256 private _currentTokenID = 0;
   mapping (uint256 => address) public creators;
-  mapping (uint256 => uint256) public tokenSupply;
   mapping (uint256 => uint256) public kingBaseCounter;
+  /* ---------------------------------------- */
 
-  // Contract name
   string public name;
-  // Contract symbol
   string public symbol;
-
-  /**
-   * Card types. Combination of:
-   *  - suit (pip) + color
-   */
-  enum CardType {
-    Suit1Color1, Suit1Color2, Suit1Color3, Suit1Color4,
-    Suit2Color1, Suit2Color2, Suit2Color3, Suit2Color4,
-    Suit3Color1, Suit3Color2, Suit3Color3, Suit3Color4,
-    Suit4Color1, Suit4Color2, Suit4Color3, Suit4Color4
-  }
 
   uint256 constant NUM_CARDTYPE = 16;
   uint256 seed;
 
-  /**
-    * @dev Improve pseudorandom number generator by letting the owner set the seed manually,
-  * making attacks more difficult
-  * @param _newSeed The new seed to use for the next transaction
-    */
-  function setSeed(uint256 _newSeed) public onlyOwner {
-    seed = _newSeed;
-  }
+  //
+  // Events
+  //
+  event RandomBaseID(
+    uint8 indexed _id
+  );
 
-  function numCardTypes() external pure returns (uint256) {
-    return NUM_CARDTYPE;
-  }
+  event KingCrowned(
+    address indexed _sender,
+    address indexed _receiver,
+    uint256 indexed _tokenId,
+    string _uri
+  );
 
-  /**
-   * @dev Pseudo-random number generator
-   * NOTE: to improve randomness, generate it with an oracle
-   */
-  function _random() internal returns (uint256) {
-    uint256 randomNumber = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, seed)));
-    seed = randomNumber;
-    return randomNumber;
-  }
+  event KingBurned(
+    address indexed _from,
+    uint256 indexed _tokenId
+  );
 
-  /**
-    If using `ganache`, be sure to specify "blockTime". From the docs:
-    Using the --blockTime flag is discouraged unless you have tests which require a specific mining interval.
-    
-    We do, because `_random()` relies on the block number.
-   */
-  function _pickRandomCardType() internal returns (CardType) {
-    uint16 value = uint16(_random().mod(NUM_CARDTYPE));
-    return CardType(value);
-  }
-
-  function _getRandomKingBase() internal returns (uint256) {
-    uint256 baseTypeID = uint256(_pickRandomCardType()) << 248;
-    return baseTypeID;
-  }
-
+  //
+  // Modifiers
+  //
   /**
    * @dev Require msg.sender to be the creator of the token id
    */
@@ -100,19 +76,13 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
     _;
   }
 
-  constructor(
-    string memory _name,
-    string memory _symbol,
-    address _proxyRegistryAddress
-  ) public {
+  constructor(string memory _name, string memory _symbol, address _proxyRegistryAddress) public {
     name = _name;
     symbol = _symbol;
     proxyRegistryAddress = _proxyRegistryAddress;
   }
 
-  function uri(
-    uint256 _id
-  ) public view returns (string memory) {
+  function uri(uint256 _id) public view returns (string memory) {
     require(_exists(_id), "ERC721Tradable#uri: NONEXISTENT_TOKEN");
     return Strings.strConcat(
       baseMetadataURI,
@@ -121,131 +91,71 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
   }
 
   /**
-    * @dev Returns the total quantity for a token ID
-    * @param _id uint256 ID of the token to query
-    * @return amount of token in existence
-    */
-  function totalSupply(
-    uint256 _id
-  ) public view returns (uint256) {
-    return tokenSupply[_id];
+   * @dev Improve pseudorandom number generator by letting the owner set the seed manually,
+   * making attacks more difficult
+   * @param _newSeed The new seed to use for the next transaction
+   */
+  function setSeed(uint256 _newSeed) public onlyOwner {
+    seed = _newSeed;
+  }
+
+  /**
+   * @dev Pseudo-random number generator
+   * NOTE: to improve randomness, generate it with an oracle
+   */
+  function _random() internal returns (uint256) {
+    uint256 randomNumber = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, seed)));
+    seed = randomNumber;
+    return randomNumber;
+  }
+
+  function randomTokenId() public returns (uint8) {
+    uint8 value = uint8(_random().mod(NUM_CARDTYPE)) + 1;
+    emit RandomBaseID(value);
+    return value;
   }
 
   /**
    * @dev Will update the base URL of token's URI
    * @param _newBaseMetadataURI New base URL of token's URI
    */
-  function setBaseMetadataURI(
-    string memory _newBaseMetadataURI
-  ) public onlyOwner {
+  function setBaseMetadataURI(string memory _newBaseMetadataURI) public onlyOwner {
     _setBaseMetadataURI(_newBaseMetadataURI);
   }
 
-  /**
-    * @dev Creates a new token type and assigns _initialSupply to an address
-    * NOTE: remove onlyOwner if you want third parties to create new tokens on your contract (which may change your IDs)
-    * @param _initialOwner address of the first owner of the token
-    * @param _initialSupply amount to supply the first owner
-    * @param _uri Optional URI for this token type
-    * @param _data Data to pass if receiver is contract
-    * @return The newly created token ID
-    */
-  function create(
-    address _initialOwner,
-    uint256 _initialSupply,
-    string calldata _uri,
-    bytes calldata _data
-  ) external onlyOwner returns (uint256) {
-    uint256 _id = _getNextTokenID();
-    _incrementTokenTypeId();
-    creators[_id] = msg.sender;
+  function crownNewKing(string calldata _uri, bytes calldata _data) external onlyOwner returns (uint256) {
+    // Get King Base
+    uint256 kingBase = uint256(randomTokenId()) << 248;
+
+    // get Next King NFT ID
+    kingBaseCounter[kingBase]++;
+    uint256 _id = kingBaseCounter[kingBase] + kingBase;
 
     if (bytes(_uri).length > 0) {
       emit URI(_uri, _id);
     }
 
-    _mint(_initialOwner, _id, _initialSupply, _data);
-    tokenSupply[_id] = _initialSupply;
+    address _to = msg.sender;
+    uint256 _amount = 1;
+    creators[_id] = msg.sender;
+
+    // Add _amount
+    balances[_to][_id] = balances[_to][_id].add(_amount);
+
+    // Emit event
+    emit KingCrowned(msg.sender, msg.sender, _id, _uri);
+    emit TransferSingle(msg.sender, address(0x0), _to, _id, _amount);
+
+    // Calling onReceive method if recipient is contract
+    _callonERC1155Received(address(0x0), _to, _id, _amount, gasleft(), _data);
+
     return _id;
-  }
-
-  function crownNewKing() external onlyOwner returns (uint256) {
-
-    // Get King Base
-    uint256 kingBase = _getRandomKingBase();
-
-    // get Next King NFT ID
-    kingBaseCounter[kingBase]++;
-    uint256 kingNFT = kingBaseCounter[kingBase];
-
-    // Return new unique ID
-    uint256 kingId = kingBase + kingNFT;
-
-    return kingId;
-  }
-
-  /**
-    * @dev Mints some amount of tokens to an addres
-    * @param _to          Address of the future owner of the token
-    * @param _id          Token ID to mint
-    * @param _quantity    Amount of tokens to mint
-    * @param _data        Data to pass if receiver is contract
-    */
-  function mint(
-    address _to,
-    uint256 _id,
-    uint256 _quantity,
-    bytes memory _data
-  ) public creatorOnly(_id) {
-    _mint(_to, _id, _quantity, _data);
-    tokenSupply[_id] = tokenSupply[_id].add(_quantity);
-  }
-
-  /**
-    * @dev Mint tokens for each id in _ids
-    * @param _to          The address to mint tokens to
-    * @param _ids         Array of ids to mint
-    * @param _quantities  Array of amounts of tokens to mint per id
-    * @param _data        Data to pass if receiver is contract
-    */
-  function batchMint(
-    address _to,
-    uint256[] memory _ids,
-    uint256[] memory _quantities,
-    bytes memory _data
-  ) public {
-    for (uint256 i = 0; i < _ids.length; i++) {
-      uint256 _id = _ids[i];
-      require(creators[_id] == msg.sender, "ERC1155Tradable#batchMint: ONLY_CREATOR_ALLOWED");
-      uint256 quantity = _quantities[i];
-      tokenSupply[_id] = tokenSupply[_id].add(quantity);
-    }
-    _batchMint(_to, _ids, _quantities, _data);
-  }
-
-  /**
-    * @dev Change the creator address for given tokens
-    * @param _to   Address of the new creator
-    * @param _ids  Array of Token IDs to change creator
-    */
-  function setCreator(
-    address _to,
-    uint256[] memory _ids
-  ) public {
-    require(_to != address(0), "ERC1155Tradable#setCreator: INVALID_ADDRESS.");
-    for (uint256 i = 0; i < _ids.length; i++) {
-      uint256 id = _ids[i];
-      _setCreator(_to, id);
-    }
   }
 
   /**
    * Override isApprovedForAll to whitelist user's OpenSea proxy accounts to enable gas-free listings.
    */
-  function isApprovedForAll(
-    address _owner,
-    address _operator
-  ) public view returns (bool isOperator) {
+  function isApprovedForAll( address _owner, address _operator) public view returns (bool isOperator) {
     // Whitelist OpenSea proxy contract for easy trading.
     ProxyRegistry proxyRegistry = ProxyRegistry(proxyRegistryAddress);
     if (address(proxyRegistry.proxies(_owner)) == _operator) {
@@ -274,20 +184,5 @@ contract ERC1155Tradable is ERC1155, ERC1155MintBurn, ERC1155Metadata, Ownable {
     uint256 _id
   ) internal view returns (bool) {
     return creators[_id] != address(0);
-  }
-
-  /**
-    * @dev calculates the next token ID based on value of _currentTokenID
-    * @return uint256 for the next token ID
-    */
-  function _getNextTokenID() private view returns (uint256) {
-    return _currentTokenID.add(1);
-  }
-
-  /**
-    * @dev increments the value of _currentTokenID
-    */
-  function _incrementTokenTypeId() private  {
-    _currentTokenID++;
   }
 }

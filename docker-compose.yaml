@@ -18,7 +18,7 @@ services:
     ports:
       - 8545:8545
       - 8546:8546
-    command: -d --fork "http://192.168.1.111:8547@10062698" --gasLimit "90000000" --mnemonic "toss seven aerobic pledge lumber yard evil benefit title duty winter initial" --networkId "999" --block-time "5"
+    command: -d --fork "http://192.168.1.111:8547@10062698" --gasLimit "90000000" --mnemonic "toss seven aerobic pledge lumber yard evil benefit title duty winter initial" --networkId "999" --block-time "1"
 
 networks:
   network:

@@ -3,7 +3,7 @@ import { Box, Select, Typography } from '@material-ui/core';
 import { Button, Card } from "rimble-ui";
 import { newContextComponents } from "@drizzle/react-components";
 
-const { ContractData } = newContextComponents;
+const { ContractData, ContractForm } = newContextComponents;
 
 /*
 function genRandom() {
@@ -39,12 +39,10 @@ export default class KingsComponent extends React.Component {
     console.log(drizzleState);    
 
     if(drizzleState.drizzleStatus.initialized) {
-      //const stackId = drizzle.contracts.SuicideKing.methods["create"].cacheSend(drizzleState.accounts[0], 1, "http://TODO_API_URL_HERE", []);
-      const stackId = drizzle.contracts.SuicideKing.methods["crownNewKing"].cacheSend();
+      const stackId = drizzle.contracts.SuicideKing.methods["crownNewKing"].cacheSend("http://", []);
 
       if(drizzleState.transactionStack[stackId]) {
         const txHash = drizzleState.transactionStack[stackId];
-        //console.log(txHash);
         console.log("King minted");
       }
     }
@@ -84,9 +82,17 @@ export default class KingsComponent extends React.Component {
           </Box>
           */}
           <Box>
-            <Button size="small" type="submit" onClick={this.handleMintKing}>
-              Mint KING
-            </Button>
+            <ContractForm
+              drizzle={drizzle}
+              drizzleState={drizzleState}
+              contract="SuicideKing"
+              method="crownNewKing"
+              render={({ inputs, inputTypes, state, handleInputChange, handleSubmit }) => (
+                <Button size="small" type="submit" onClick={this.handleMintKing}>
+                  Mint KING
+                </Button>
+              )} 
+            />
           </Box> 
         </Card>
       </Box>
