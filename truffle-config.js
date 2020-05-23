@@ -47,7 +47,7 @@ module.exports = {
     },
     rinkeby: {
       provider: new HDWalletProvider(secrets.mnemonic, "https://rinkeby.infura.io/v3/"+secrets.infuraApiKey),
-      network_id: "*"
+      network_id: 4
     }
   },
 
@@ -64,5 +64,13 @@ module.exports = {
       //  evmVersion: "byzantium"
       // }
     }
+  },
+
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+
+  api_keys: {
+    etherscan: secrets.etherscanApiKey
   }
 };
