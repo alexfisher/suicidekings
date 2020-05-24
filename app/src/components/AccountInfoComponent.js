@@ -29,7 +29,7 @@ export default class AccountInfoComponent extends React.Component {
       <Card>
         <EthAddress address={drizzleState.accounts[0]} textLabels />
         <Box>
-          Balance: {drizzleState.accountBalances[drizzleState.accounts[0]]} Wei
+          Balance: { drizzleState.accountBalances[drizzleState.accounts[0]] } Wei
         </Box>
       </Card>
     </Box>

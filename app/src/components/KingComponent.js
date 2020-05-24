@@ -1,23 +1,34 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { Box, Select, Typography } from '@material-ui/core';
-import { Button, Card } from "rimble-ui";
+import { Button, Card, Modal } from "rimble-ui";
 import { newContextComponents } from "@drizzle/react-components";
 
 const { ContractData, ContractForm } = newContextComponents;
 
-/*
-function genRandom() {
-  const randomNum = drizzle.contracts.SuicideKingCardFactory.methods.pickRandomCardType.cacheSend({from: drizzleState.accounts[0]});
+export class KingsCrownedModal extends Modal {
+  constructor(props) {
+    super(props);
+
+  }
+
+  componentDidMount() {
+    const { drizzle } = this.props;
+  }
 }
-*/
+
+KingsCrownedModal.defaultProps = {
+};
+
+KingsCrownedModal.propTypes = {
+};
 
 export default class KingsComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { id: 1, tokenSymbol: null };
+    this.state = { id: 1, tokenId: null, tokenSymbol: null };
 
     this.handleIdChange = this.handleIdChange.bind(this);
-    this.handleMintKing = this.handleMintKing.bind(this);
   }
 
   componentDidMount() {
@@ -28,26 +39,64 @@ export default class KingsComponent extends React.Component {
     this.setState({tokenSymbol});
   }
 
-  handleIdChange(event) {
-    this.setState({id: event.target.value});
-    console.log(event.target.value);
+  handleIdChange(tokenId) {
+    this.setState({tokenId: tokenId});
   }
 
-  handleMintKing(event) {
+  handleMintKing = (event) => {
     const { drizzle, drizzleState } = this.props;
     console.log(drizzle);
     console.log(drizzleState);    
 
-    if(drizzleState.drizzleStatus.initialized) {
-      const stackId = drizzle.contracts.SuicideKing.methods["crownNewKing"].cacheSend("http://", []);
+    drizzle.contracts.SuicideKing.methods
+      .crownNewKing("http://", [])
+      .send({ from: drizzleState.accounts[0] })
+      .then(function (result) {
+        return result.events;
+    })
+    .then(function(events) {
+      return events.KingCrowned.returnValues._tokenId
+    })
+    .then(function(tokenId) {
+      var decimal = drizzle.web3.utils.toBN(tokenId).words[9] >> 14;
+      var output = "";
+      switch(decimal) {
+        case 1: output = "Spades; Red";  break;
+        case 2: output = "Spades; White";  break;
+        case 3: output = "Spades; Green";  break;
+        case 4: output = "Spades; Yellow";  break;
 
-      if(drizzleState.transactionStack[stackId]) {
-        const txHash = drizzleState.transactionStack[stackId];
-        console.log("King minted");
+        case 5: output = "Clubs; Red";  break;
+        case 6: output = "Clubs; White";  break;
+        case 7: output = "Clubs; Green";  break;
+        case 8: output = "Clubs; Yellow";  break;
+
+        case 9: output = "Diamonds; Red";  break;
+        case 10: output = "Diamonds; White";  break;
+        case 11: output = "Diamonds; Green";  break;
+        case 12: output = "Diamonds; Yellow";  break;
+        
+        case 13: output = "Hearts; Red";  break;
+        case 14: output = "Hearts; White";  break;
+        case 15: output = "Hearts; Green";  break;
+        case 16: output = "Hearts; Yellow";  break;
+
+        default:
+          // code block
       }
-    }
-    
-  }  
+      var bigNum  =
+
+      alert(`${output}\n\nID: ${tokenId}`)
+
+      // alert(drizzle.web3.utils.toHex(decimal));
+      // this god-damn, stupid-ass call...the VERY basis of how React is supposed to work...
+      // won't work because fucking Javascript can't find 'this', and no amount of 'BINDING'
+      // or switching to dumbass ES6 function syntax is doing a damn thing:
+      //
+      // this.setState({tokenId: tokenId})
+    });
+  }
+
 
   render() {
     const { drizzle, drizzleState } = this.props;
@@ -62,25 +111,6 @@ export default class KingsComponent extends React.Component {
           </Typography>      
         </Box>
         <Card>  
-          {/*
-          <Box>
-            ERC1155 type (_id):&nbsp; 
-            <Select value={this.state.id} onChange={this.handleIdChange}>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </Select>&nbsp;Total Supply:&nbsp;
-            <ContractData
-            drizzle={drizzle}
-            drizzleState={drizzleState}
-            contract="SuicideKing"
-            method="totalSupply"
-            methodArgs={[this.state.id]}
-            />&nbsp;{tokenSymbol && tokenSymbol.value}S
-          </Box>
-          */}
           <Box>
             <ContractForm
               drizzle={drizzle}

@@ -1,6 +1,5 @@
 //import Web3 from "web3";
 import SuicideKing from "./contracts/SuicideKing.json";
-import SuicideKingCardFactory from "./contracts/SuicideKingCardFactory.json"
 import CETH from "./external-contracts/Compound.json";
 
 const options = {
@@ -11,7 +10,6 @@ const options = {
   },
   contracts: [
     SuicideKing,
-    SuicideKingCardFactory,
     CETH
   ],
   events: {

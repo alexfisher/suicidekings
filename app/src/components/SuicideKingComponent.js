@@ -5,12 +5,6 @@ import AccountInfoComponent from "./AccountInfoComponent";
 import KingComponent from "./KingComponent";
 import CompoundInfoComponent from "./CompoundInfoComponent";
 import logo from "../logo.png";
-import {
-  AccountData,
-  ContractData,
-  ContractForm,
-  LoadingContainer
-} from "@drizzle/react-components";
 
 // Drizzle Context provides three types of React Components, e.g. destructure example:
 // const { AccountData, ContractData, ContractForm } = newContextComponents;

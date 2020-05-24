@@ -28,7 +28,6 @@ contract ERC1155Tradable is ERC1155, ReentrancyGuard, ERC1155Metadata, Ownable {
   /* DELETE THESE */
   /* ---------------------------------------- */
   uint256 private _currentTokenID = 0;
-  mapping (uint256 => address) public creators;
   mapping (uint256 => uint256) public kingBaseCounter;
   /* ---------------------------------------- */
 
@@ -61,14 +60,6 @@ contract ERC1155Tradable is ERC1155, ReentrancyGuard, ERC1155Metadata, Ownable {
   // Modifiers
   //
   /**
-   * @dev Require msg.sender to be the creator of the token id
-   */
-  modifier creatorOnly(uint256 _id) {
-    require(creators[_id] == msg.sender, "ERC1155Tradable#creatorOnly: ONLY_CREATOR_ALLOWED");
-    _;
-  }
-
-  /**
    * @dev Require msg.sender to own more than 0 of the token id
    */
   modifier ownersOnly(uint256 _id) {
@@ -83,11 +74,7 @@ contract ERC1155Tradable is ERC1155, ReentrancyGuard, ERC1155Metadata, Ownable {
   }
 
   function uri(uint256 _id) public view returns (string memory) {
-    require(_exists(_id), "ERC721Tradable#uri: NONEXISTENT_TOKEN");
-    return Strings.strConcat(
-      baseMetadataURI,
-      Strings.uint2str(_id)
-    );
+    return Strings.strConcat(baseMetadataURI, Strings.uint2str(_id));
   }
 
   /**
@@ -137,7 +124,6 @@ contract ERC1155Tradable is ERC1155, ReentrancyGuard, ERC1155Metadata, Ownable {
 
     address _to = msg.sender;
     uint256 _amount = 1;
-    creators[_id] = msg.sender;
 
     // Add _amount
     balances[_to][_id] = balances[_to][_id].add(_amount);
@@ -163,26 +149,5 @@ contract ERC1155Tradable is ERC1155, ReentrancyGuard, ERC1155Metadata, Ownable {
     }
 
     return ERC1155.isApprovedForAll(_owner, _operator);
-  }
-
-  /**
-    * @dev Change the creator address for given token
-    * @param _to   Address of the new creator
-    * @param _id  Token IDs to change creator of
-    */
-  function _setCreator(address _to, uint256 _id) internal creatorOnly(_id)
-  {
-      creators[_id] = _to;
-  }
-
-  /**
-    * @dev Returns whether the specified token exists by checking to see if it has a creator
-    * @param _id uint256 ID of the token to query the existence of
-    * @return bool whether the token exists
-    */
-  function _exists(
-    uint256 _id
-  ) internal view returns (bool) {
-    return creators[_id] != address(0);
   }
 }
